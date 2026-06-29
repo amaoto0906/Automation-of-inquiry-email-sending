@@ -288,6 +288,11 @@ html[data-theme="dark"] { background: var(--bg); }
 [data-theme="dark"] .row-delete { color: #fb7185; }
 [data-theme="dark"] .row-delete:hover { background: var(--danger-bg); }
 [data-theme="dark"] .delete-confirm-icon { background: var(--danger-bg); color: #fb7185; }
+[data-theme="dark"] .toast { background: var(--surface); border-color: #1e5a44; box-shadow: 0 20px 50px -14px rgba(0,0,0,.6); }
+[data-theme="dark"] .toast strong { color: var(--text); }
+[data-theme="dark"] .toast-icon { color: #6ee7b7; }
+[data-theme="dark"] .unsaved-dot { color: #fcd34d; }
+[data-theme="dark"] .unsaved-dialog-icon { background: var(--warning-bg); color: #fcd34d; }
 
 /* ===== 空状態・ローディング ===== */
 [data-theme="dark"] .empty-state h3 { color: var(--text); }
