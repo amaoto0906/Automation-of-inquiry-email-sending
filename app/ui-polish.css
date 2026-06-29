@@ -348,13 +348,15 @@ tbody tr:hover td { background: #f8fbff; }
 .status-info, .status-cyan { border-color: #ccecf9; }
 .status-indigo { border-color: #d8e3ff; }
 .toggle-status { min-height: 29px; }
-.avatar { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; color: #2059b5; border: 1px solid #d3e2f7; border-radius: 11px; background: linear-gradient(145deg, #f2f7ff, #e6f0ff); font-weight: 700; }
+.avatar { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; line-height: 1; text-align: center; color: #2059b5; border: 1px solid #d3e2f7; border-radius: 11px; background: linear-gradient(145deg, #f2f7ff, #e6f0ff); font-weight: 700; }
 .avatar-sm { width: 28px; height: 28px; font-size: 11px; }
 .avatar-md { width: 36px; height: 36px; font-size: 13px; }
 .avatar-lg { width: 44px; height: 44px; font-size: 15px; }
+/* アバターは常にflex中央寄せ。コンテナ側の子孫span規則（display:block 等）に潰されないよう堅牢化 */
+.avatar.avatar-sm, .avatar.avatar-md, .avatar.avatar-lg { display: inline-flex; }
 .user-cell { display: flex; align-items: center; gap: 11px; }
-.user-cell strong, .user-cell span { display: block; }
-.user-cell span { color: var(--text-muted); font-size: 12px; }
+.user-cell > div strong, .user-cell > div span { display: block; }
+.user-cell > div span { color: var(--text-muted); font-size: 12px; }
 .online-status { display: inline-flex; align-items: center; gap: 6px; color: #047857; font-size: 12px; font-weight: 600; }
 .online-status i { width: 7px; height: 7px; border-radius: 50%; background: #10b981; box-shadow: 0 0 0 4px #dcfce7; }
 .role-badge.admin { border: 1px solid #d7e3ff; }
