@@ -35,7 +35,7 @@ body {
     radial-gradient(circle at 90% 2%, rgba(56, 189, 248, .08), transparent 24rem),
     radial-gradient(circle at 30% 98%, rgba(99, 102, 241, .055), transparent 30rem),
     var(--bg);
-  font-family: Inter, "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", Meiryo, sans-serif;
+  font-family: var(--font-inter), var(--font-noto-jp), "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Noto Sans JP", Meiryo, system-ui, sans-serif;
   letter-spacing: .01em;
 }
 ::selection { color: #fff; background: #2563eb; }
