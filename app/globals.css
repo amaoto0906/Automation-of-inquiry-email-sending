@@ -577,9 +577,9 @@ img { max-width: 100%; }
 /* 設定 */
 .settings-layout { display: grid; grid-template-columns: 220px 1fr; gap: 22px; align-items: start; }
 .settings-nav { display: flex; flex-direction: column; gap: 4px; position: sticky; top: 84px; }
-.settings-nav a { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-radius: 11px; font-size: 13.5px; font-weight: 600; color: var(--text-muted); transition: all .16s; }
-.settings-nav a:hover { background: var(--surface-2); color: var(--primary); }
-.settings-nav a.active { background: var(--grad-primary); color: #fff; box-shadow: var(--shadow-glow); }
+.settings-nav a, .settings-nav button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 11px 14px; border: 0; background: transparent; cursor: pointer; text-align: left; border-radius: 11px; font-size: 13.5px; font-weight: 600; color: var(--text-muted); transition: all .16s; }
+.settings-nav a:hover, .settings-nav button:hover { background: var(--surface-2); color: var(--primary); }
+.settings-nav a.active, .settings-nav button.active { background: var(--grad-primary); color: #fff; box-shadow: var(--shadow-glow); }
 .settings-content { display: flex; flex-direction: column; gap: 22px; }
 .setting-section { display: flex; flex-direction: column; gap: 14px; }
 .setting-heading { display: flex; align-items: center; gap: 13px; margin-bottom: 4px; }
