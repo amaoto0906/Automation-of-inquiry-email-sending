@@ -9,7 +9,6 @@ import {
   ChevronLeft,
   ChevronRight,
   FileSearch,
-  FileText,
   Gauge,
   HelpCircle,
   KeyRound,
@@ -27,6 +26,7 @@ import {
 import { useEffect, useState } from "react";
 import { UserAvatar } from "./ui";
 import { ThemeToggle } from "./theme-toggle";
+import { Logo } from "./logo";
 
 interface NavItem {
   href: string;
@@ -97,11 +97,13 @@ export function AppShell({ children, user }: AppShellProps) {
   const sidebar = (
     <>
       <div className="brand">
-        <span className="brand-mark" aria-hidden="true"><FileText size={20} /></span>
-        <div className="brand-copy">
-          <strong>Outreach Hub</strong>
-          <span>Control Center</span>
-        </div>
+        <Link href="/dashboard" className="brand-link" onClick={() => setMobileOpen(false)} aria-label="ダッシュボードへ移動">
+          <Logo size={40} className="brand-logo" />
+          <div className="brand-copy">
+            <strong>Outreach Hub</strong>
+            <span>Control Center</span>
+          </div>
+        </Link>
         <button className="mobile-close" onClick={() => setMobileOpen(false)} aria-label="メニューを閉じる">
           <X size={20} />
         </button>

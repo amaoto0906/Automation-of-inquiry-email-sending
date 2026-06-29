@@ -1,9 +1,10 @@
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/session";
-import { FileText, LockKeyhole, MousePointerClick, Search, Sheet, ShieldCheck, Sparkles } from "lucide-react";
+import { LockKeyhole, MousePointerClick, Search, Sheet, ShieldCheck, Sparkles } from "lucide-react";
 import { LoginForm } from "@/components/login-form";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Logo } from "@/components/logo";
 
 export const metadata = { title: "ログイン" };
 
@@ -30,7 +31,7 @@ export default async function LoginPage() {
           />
 
           <div className="login-brand">
-            <span><FileText size={22} /></span>
+            <Logo size={44} />
             <strong>Outreach Hub</strong>
           </div>
 
