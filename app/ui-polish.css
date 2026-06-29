@@ -312,38 +312,112 @@ tbody tr:hover td { background: #f8fbff; }
 .permission-note { display: flex; gap: 12px; margin-top: 18px; padding: 16px 18px; color: #315987; border: 1px solid #d7e7f8; border-radius: 12px; background: #f2f8ff; }
 .permission-note p { color: #6a7b93; font-size: 12px; margin-top: 2px; }
 
-/* Login */
+/* ===== Login（中央配置の分割カード：左ブランド面＋右フォームを1枚に統合） ===== */
 .login-page {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 100vh; padding: 28px; overflow: auto;
   color: #12213b;
-  background: #edf5ff;
+  background:
+    radial-gradient(1200px 720px at 14% 8%, rgba(59,130,246,.18), transparent 56%),
+    radial-gradient(1000px 640px at 88% 94%, rgba(6,182,212,.16), transparent 56%),
+    #e7edf8;
 }
-.login-page::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: url('/assets/generated/webp/hero-dashboard-bg.webp') center / cover no-repeat;
-  opacity: .92;
+.login-page::before { content: none; }
+.login-theme-toggle { position: fixed; }
+
+/* 1枚の大きなカード（左右対称グリッド） */
+.auth-card {
+  position: relative;
+  display: grid; grid-template-columns: 1fr 1fr;
+  width: min(1060px, 100%);
+  min-height: min(660px, calc(100vh - 56px));
+  border-radius: 26px; overflow: hidden;
+  background: #fff;
+  border: 1px solid rgba(255,255,255,.7);
+  box-shadow: 0 44px 110px -34px rgba(18,38,86,.5), 0 14px 44px -16px rgba(18,38,86,.22);
 }
-.login-showcase { flex-basis: 58%; padding: 54px clamp(34px, 5vw, 76px); color: #13213b; }
-.login-brand { position: relative; z-index: 3; margin-bottom: auto; }
-.login-brand span { color: #fff; background: linear-gradient(145deg, #2563eb, #4f46e5); box-shadow: 0 10px 24px rgba(37,99,235,.22); }
-.login-brand strong { color: #11213c; }
-.showcase-copy { position: relative; z-index: 3; max-width: 620px; margin: 42px 0 52px; }
-.showcase-label { color: #2563eb; }
-.showcase-copy h1 { color: #10213d; font-size: clamp(35px, 4vw, 54px); line-height: 1.22; letter-spacing: -.045em; }
-.showcase-copy p { color: #5d718f; max-width: 560px; }
-.feature-list { max-width: 520px; padding: 18px 20px; border: 1px solid rgba(196,214,235,.75); border-radius: 12px; background: rgba(255,255,255,.56); backdrop-filter: blur(10px); }
-.feature-list span { color: #3f5473; }
-.feature-list svg { color: #059669; }
-.login-security-art { position: absolute; z-index: 2; right: 1%; bottom: 8%; width: min(48%, 560px); height: auto; opacity: .36; mix-blend-mode: multiply; pointer-events: none; }
-.showcase-security { position: relative; z-index: 3; color: #637692; margin-top: auto; }
-.login-panel { width: min(470px, 42vw); margin: 24px; border: 1px solid rgba(255,255,255,.86); border-radius: 14px; background: rgba(255,255,255,.88); backdrop-filter: blur(22px) saturate(150%); box-shadow: 0 30px 80px rgba(31,69,120,.16); }
-.login-card { max-width: 360px; }
-.login-lock { width: 54px; height: 54px; border: 1px solid #d9e6fa; border-radius: 12px; box-shadow: 0 8px 22px rgba(37,99,235,.1); }
-.login-card h2 { font-size: 25px; letter-spacing: -.035em; }
-.input-with-icon { min-height: 46px; border-color: #d7e1ee; border-radius: 11px; }
-.login-button { min-height: 47px; border-radius: 11px; background: linear-gradient(135deg, #2f6feb, #2454cf); box-shadow: 0 10px 22px rgba(37,99,235,.2); }
-.login-button:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 14px 28px rgba(37,99,235,.26); }
+
+/* 左：ブランド面（背景画像＋ブランドグラデーション） */
+.auth-aside {
+  position: relative; overflow: hidden; z-index: 0;
+  display: flex; flex-direction: column; justify-content: space-between; gap: 24px;
+  padding: clamp(34px, 3.2vw, 52px);
+  color: #fff;
+  background:
+    linear-gradient(158deg, rgba(15,30,75,.94) 0%, rgba(33,74,184,.88) 52%, rgba(8,126,158,.86) 100%),
+    url('/assets/generated/webp/hero-dashboard-bg.webp') center / cover no-repeat;
+}
+.auth-aside .login-brand { position: relative; z-index: 2; display: flex; align-items: center; gap: 12px; }
+.auth-aside .login-brand span {
+  width: 46px; height: 46px; border: 1px solid rgba(255,255,255,.28); border-radius: 14px;
+  background: rgba(255,255,255,.16); backdrop-filter: blur(6px); color: #fff;
+  box-shadow: 0 8px 20px rgba(0,0,0,.18);
+}
+.auth-aside .login-brand strong { color: #fff; font-size: 19px; font-weight: 800; letter-spacing: -.01em; }
+
+.auth-copy { position: relative; z-index: 2; display: flex; flex-direction: column; }
+.auth-copy .showcase-label {
+  display: inline-flex; align-items: center; gap: 8px; width: fit-content;
+  margin-bottom: 18px; padding: 0; background: none; border: 0; backdrop-filter: none;
+  color: #bcd4ff; font-size: 10.5px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase;
+}
+.auth-copy .showcase-label svg { color: #bcd4ff; }
+.auth-copy h1 {
+  color: #fff; font-weight: 800;
+  font-size: clamp(25px, 2.3vw, 33px); line-height: 1.34; letter-spacing: -.02em; margin-bottom: 15px;
+}
+.auth-copy > p {
+  color: rgba(223,232,250,.82); font-size: 14px; line-height: 1.8; max-width: 410px; margin-bottom: 26px;
+}
+.auth-copy .feature-list {
+  display: flex; flex-direction: column; gap: 13px;
+  margin: 0; padding: 0; list-style: none; border: 0; background: none; backdrop-filter: none;
+}
+.auth-copy .feature-list li { display: flex; align-items: center; gap: 12px; color: rgba(231,238,251,.94); font-size: 13.5px; font-weight: 500; }
+.auth-copy .feature-list li > span { display: inline; }
+.auth-copy .feature-list svg { color: #6ee7b7; flex: 0 0 auto; }
+
+.auth-aside .showcase-security {
+  position: relative; z-index: 2; display: flex; align-items: center; gap: 9px;
+  color: rgba(198,212,238,.78); font-size: 12.5px; margin: 0;
+}
+.auth-aside .showcase-security svg { color: #9cc0ff; flex: 0 0 auto; }
+
+/* 背景に溶け込むプロダクト・ビジュアル（額縁感なし） */
+.auth-art {
+  position: absolute; z-index: 1; right: -14%; bottom: -12%;
+  width: min(78%, 380px); height: auto; opacity: .42;
+  -webkit-mask-image: radial-gradient(58% 58% at 54% 46%, #000 30%, transparent 74%);
+  mask-image: radial-gradient(58% 58% at 54% 46%, #000 30%, transparent 74%);
+  pointer-events: none;
+}
+
+/* 右：フォーム面（左面と対称） */
+.auth-form {
+  display: flex; align-items: center; justify-content: center;
+  padding: clamp(32px, 3vw, 56px); background: #fff;
+}
+.auth-form .login-card { max-width: 332px; width: 100%; }
+.login-lock { width: 52px; height: 52px; border: 0; border-radius: 15px; box-shadow: 0 10px 26px rgba(37,99,235,.32); }
+.login-card h2 { font-size: 24px; font-weight: 800; letter-spacing: -.02em; }
+.input-with-icon { min-height: 48px; border-color: #d7e1ee; border-radius: 12px; }
+.login-button { min-height: 48px; border-radius: 12px; background: linear-gradient(135deg, #2f6feb, #2454cf); box-shadow: 0 12px 26px rgba(37,99,235,.28); }
+.login-button:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 16px 32px rgba(37,99,235,.34); }
+
+/* レスポンシブ：左面を上部バンドに（〜820px） */
+@media (max-width: 820px) {
+  .login-page { padding: 16px; }
+  .auth-card { grid-template-columns: 1fr; width: min(440px, 100%); min-height: auto; }
+  .auth-aside { padding: 30px 28px 26px; gap: 14px; }
+  .auth-copy { gap: 0; }
+  .auth-copy h1 { font-size: 21px; margin-bottom: 0; line-height: 1.4; }
+  .auth-copy > p, .auth-copy .feature-list, .auth-aside .showcase-security, .auth-art { display: none; }
+}
+@media (max-width: 380px) {
+  .login-page { padding: 0; }
+  .auth-card { border-radius: 0; min-height: 100vh; border: 0; }
+  .auth-aside { padding: 26px 22px 22px; }
+}
 
 /* Review — safety-critical screen */
 .review-heading { display: flex; min-height: 136px; }

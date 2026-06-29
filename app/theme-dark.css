@@ -238,17 +238,18 @@ html[data-theme="dark"] { background: var(--bg); }
 [data-theme="dark"] .divider::before, [data-theme="dark"] .divider::after { background: var(--border); }
 [data-theme="dark"] .back-link { color: var(--text-muted); }
 
-/* ===== ログイン画面 ===== */
-[data-theme="dark"] .login-page { background: #05080f; }
-[data-theme="dark"] .login-page::before { opacity: 0.22; }
-[data-theme="dark"] .showcase-copy h1,
-[data-theme="dark"] .login-brand strong { color: var(--text); }
-[data-theme="dark"] .showcase-copy p,
-[data-theme="dark"] .feature-list span,
-[data-theme="dark"] .showcase-security { color: var(--text-muted); }
-[data-theme="dark"] .feature-list { background: rgba(255, 255, 255, 0.04); border-color: var(--border); }
-[data-theme="dark"] .login-security-art { mix-blend-mode: normal; opacity: 0.5; }
-[data-theme="dark"] .login-panel { background: rgba(17, 23, 38, 0.94); border-color: var(--border); }
+/* ===== ログイン画面（ダーク：中央カード） ===== */
+[data-theme="dark"] .login-page {
+  color: var(--text);
+  background:
+    radial-gradient(1200px 720px at 14% 8%, rgba(37,99,235,.22), transparent 56%),
+    radial-gradient(1000px 640px at 88% 94%, rgba(6,182,212,.14), transparent 56%),
+    #070b14;
+}
+/* カード本体と右フォーム面をダークに（左ブランド面は両テーマ共通のグラデーション） */
+[data-theme="dark"] .auth-card { background: #111727; border-color: rgba(255,255,255,.07); box-shadow: 0 44px 110px -30px rgba(0,0,0,.7); }
+[data-theme="dark"] .auth-form { background: #111727; }
+[data-theme="dark"] .auth-art { opacity: 0.34; }
 [data-theme="dark"] .login-card h2 { color: var(--text); }
 [data-theme="dark"] .login-description { color: var(--text-muted); }
 [data-theme="dark"] .input-with-icon { background: var(--surface-2); }
