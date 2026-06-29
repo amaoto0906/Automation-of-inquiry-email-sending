@@ -541,6 +541,80 @@ tbody tr:hover td { background: #f8fbff; }
   .preview-field { display: block; }
   .preview-field span { display: block; width: auto; margin-bottom: 4px; }
 }
+
+/* ============================================================
+   スモールフォン対応（〜480px / 〜360px）— 320px まで横スクロールなし
+   ============================================================ */
+@media (max-width: 480px) {
+  /* 横オーバーフロー防止の土台 */
+  .main-column, .page-container, .panel, .stat-card, .mini-stats > div { min-width: 0; }
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; }
+  /* データテーブルは列を潰さず横スクロール（バッジ/会社名の見苦しい縦折返しを防止） */
+  .table-wrap th, .table-wrap td { white-space: nowrap; }
+
+  /* ツールバー：縦積み・全幅（検索・日付・セレクト・ボタンが折り返さない問題を解消） */
+  .table-toolbar { flex-direction: column; align-items: stretch; gap: 10px; }
+  .table-toolbar > * { width: 100%; max-width: none; }
+  .table-toolbar .search-input, .table-toolbar .search-input.wide { width: 100%; max-width: none; }
+  .table-toolbar input, .table-toolbar select { width: 100%; min-width: 0; }
+  .toolbar-actions { width: 100%; flex-wrap: wrap; gap: 8px; }
+  .toolbar-actions > * { flex: 1 1 140px; min-width: 0; }
+  .toolbar-actions select { width: 100%; }
+  .table-toolbar .button, .toolbar-actions .button, .filter-button { width: 100%; justify-content: center; }
+
+  /* フィルターチップ・ページネーションは折り返し */
+  .filter-chips { flex-wrap: wrap; }
+  .pagination { flex-wrap: wrap; }
+  .table-footer { gap: 12px; }
+
+  /* ミニ統計は1列（窮屈な折返しを防ぐ） */
+  .mini-stats { flex-direction: column; gap: 10px; }
+  .mini-stats > div { width: 100%; }
+
+  /* サマリーストリップは縦積み */
+  .summary-strip { gap: 14px; padding: 16px; }
+  .summary-strip > div { width: 100%; }
+  .summary-progress { width: 100%; }
+
+  /* カード・コンテナの余白を圧縮 */
+  .page-container { padding: 18px 13px 40px; }
+  .panel { padding: 18px 15px; }
+  .page-title, .review-heading { padding: 18px 16px; min-height: auto; }
+
+  /* 見出しサイズを抑える */
+  .page-title h1, .review-heading h1 { font-size: 22px; }
+  .hero-content h2 { font-size: 21px; }
+  .stat-card strong { font-size: 27px; }
+
+  /* モーダルを全幅・操作ボタン縦並び */
+  .modal, .modal-box { max-width: 100%; border-radius: 14px; }
+  .modal-body, .modal-form { padding: 18px; }
+  .modal-actions, .modal-footer { flex-direction: column-reverse; }
+  .modal-actions .button, .modal-footer .button { width: 100%; justify-content: center; }
+
+  /* ボタン行も縦並びで押しやすく */
+  .button-row .button { flex: 1 1 auto; justify-content: center; }
+
+  /* 詳細グリッド・各種2カラムは1カラム */
+  .detail-grid, .sheet-overview { grid-template-columns: 1fr; }
+  .sheet-overview .sheet-connection { grid-column: auto; }
+}
+
+@media (max-width: 360px) {
+  .page-container { padding: 16px 10px 36px; }
+  .top-header { padding: 0 12px; gap: 8px; }
+  .header-actions { gap: 4px; }
+  .icon-button { width: 36px; height: 36px; }
+  .page-title h1, .review-heading h1 { font-size: 20px; line-height: 1.3; }
+  .hero-content h2 { font-size: 19px; }
+  .showcase-copy h1 { font-size: 28px; }
+  .stat-card strong { font-size: 25px; }
+  .mini-stats strong, .sheet-stat strong, .summary-strip strong { font-size: 18px; }
+  .login-panel { margin: 8px; border-radius: 18px; }
+  .login-showcase { padding: 32px 20px 18px; }
+  .brand { padding: 14px 16px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
