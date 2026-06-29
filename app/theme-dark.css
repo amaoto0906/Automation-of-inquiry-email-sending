@@ -254,6 +254,17 @@ html[data-theme="dark"] { background: var(--bg); }
 [data-theme="dark"] .input-with-icon { background: var(--surface-2); }
 [data-theme="dark"] .form-error { background: var(--danger-bg); border-color: #5a2233; color: #fda4af; }
 
+/* ===== 通知ドロップダウン（ダーク） ===== */
+[data-theme="dark"] .notif-dropdown { background: #141b2b; border-color: var(--border); box-shadow: 0 24px 60px -18px rgba(0,0,0,.7); }
+[data-theme="dark"] .notif-dropdown-head { border-color: var(--border); }
+[data-theme="dark"] .notif-dropdown-head strong { color: var(--text); }
+[data-theme="dark"] .notif-row { border-color: var(--border); }
+[data-theme="dark"] .notif-row:hover { background: var(--surface-2); }
+[data-theme="dark"] .notif-row-icon { background: var(--primary-bg); color: var(--primary-light); }
+[data-theme="dark"] .notif-row-body strong { color: var(--text); }
+[data-theme="dark"] .notif-foot { background: #0f1626; border-color: var(--border); color: var(--primary-light); }
+[data-theme="dark"] .notif-foot:hover { background: var(--surface-2); }
+
 /* ===== 新規登録・承認・プロフィール（ダーク） ===== */
 [data-theme="dark"] .register-title,
 [data-theme="dark"] .register-verify-head h2,

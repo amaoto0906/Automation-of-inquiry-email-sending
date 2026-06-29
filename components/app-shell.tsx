@@ -20,11 +20,12 @@ import {
   Settings,
   Sheet,
   ShieldCheck,
+  UserPlus,
   Users,
   UserCog,
   X,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { UserAvatar } from "./ui";
 import { ThemeToggle } from "./theme-toggle";
 import { Logo } from "./logo";
@@ -71,6 +72,25 @@ const navGroups: NavGroup[] = [
   },
 ];
 
+interface NotifItem {
+  id: string;
+  type: string;
+  name: string;
+  company: string | null;
+  email: string;
+  createdAt: string;
+}
+
+function timeAgo(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return "たった今";
+  if (m < 60) return `${m}分前`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}時間前`;
+  return `${Math.floor(h / 24)}日前`;
+}
+
 interface AppShellProps {
   children: React.ReactNode;
   user?: { id: string; name: string; email: string; role: string };
@@ -86,8 +106,42 @@ export function AppShell({ children, user }: AppShellProps) {
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  const [notifCount, setNotifCount] = useState(0);
+  const [notifItems, setNotifItems] = useState<NotifItem[]>([]);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const notifRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => setMobileOpen(false), [pathname]);
+  useEffect(() => { setMobileOpen(false); setNotifOpen(false); }, [pathname]);
+
+  // 通知（承認待ちの新規登録）を取得。ページ遷移時と30秒ごとに更新。
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      try {
+        const res = await fetch("/api/notifications");
+        if (res.ok && active) {
+          const d = await res.json();
+          setNotifCount(d.count ?? 0);
+          setNotifItems(d.items ?? []);
+        }
+      } catch {
+        /* noop */
+      }
+    };
+    load();
+    const timer = setInterval(load, 30000);
+    return () => { active = false; clearInterval(timer); };
+  }, [pathname]);
+
+  // ドロップダウン外クリックで閉じる
+  useEffect(() => {
+    if (!notifOpen) return;
+    const onClick = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) setNotifOpen(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, [notifOpen]);
 
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -122,11 +176,13 @@ export function AppShell({ children, user }: AppShellProps) {
             {group.items.map((item) => {
               const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
               const Icon = item.icon;
+              // ユーザー管理には承認待ち件数を動的バッジで表示
+              const badge = item.href === "/users" ? (notifCount > 0 ? String(notifCount) : undefined) : item.badge;
               return (
                 <Link key={item.href} href={item.href} className={`nav-item ${active ? "active" : ""}`} title={collapsed ? item.label : undefined}>
                   <Icon size={19} aria-hidden="true" />
                   <span>{item.label}</span>
-                  {item.badge && <b>{item.badge}</b>}
+                  {badge && <b className="nav-badge">{badge}</b>}
                 </Link>
               );
             })}
@@ -162,7 +218,46 @@ export function AppShell({ children, user }: AppShellProps) {
           <div className="header-actions">
             <span className="sync-pill"><span />シート同期済み</span>
             <ThemeToggle />
-            <button className="icon-button" aria-label="通知"><Bell size={19} /><i /></button>
+            <div className="notif-wrap" ref={notifRef}>
+              <button
+                className="icon-button"
+                aria-label={notifCount > 0 ? `通知 ${notifCount} 件` : "通知"}
+                aria-expanded={notifOpen}
+                onClick={() => setNotifOpen((o) => !o)}
+              >
+                <Bell size={19} />
+                {notifCount > 0 && <span className="notif-badge">{notifCount > 9 ? "9+" : notifCount}</span>}
+              </button>
+              {notifOpen && (
+                <div className="notif-dropdown" role="menu">
+                  <div className="notif-dropdown-head">
+                    <strong>通知</strong>
+                    {notifCount > 0 && <span className="notif-count-pill">{notifCount}</span>}
+                  </div>
+                  <div className="notif-list">
+                    {notifItems.length === 0 ? (
+                      <div className="notif-empty"><Bell size={22} /><span>新しい通知はありません</span></div>
+                    ) : (
+                      notifItems.map((item) => (
+                        <Link key={item.id} href="/users" className="notif-row" onClick={() => setNotifOpen(false)}>
+                          <span className="notif-row-icon"><UserPlus size={16} /></span>
+                          <div className="notif-row-body">
+                            <strong>{item.name} さんが新規登録</strong>
+                            <span>{item.company ?? item.email}・承認待ち</span>
+                          </div>
+                          <span className="notif-row-time">{timeAgo(item.createdAt)}</span>
+                        </Link>
+                      ))
+                    )}
+                  </div>
+                  {notifItems.length > 0 && (
+                    <Link href="/users" className="notif-foot" onClick={() => setNotifOpen(false)}>
+                      承認待ち一覧をすべて表示
+                    </Link>
+                  )}
+                </div>
+              )}
+            </div>
             <Link href="/profile" className="header-user" title="プロフィール">
               <UserAvatar initials={initials} />
               <div><strong>{displayName}</strong><span>{roleLabel}</span></div>
