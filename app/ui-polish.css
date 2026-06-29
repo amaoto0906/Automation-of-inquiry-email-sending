@@ -572,6 +572,16 @@ tbody tr:hover td { background: #f8fbff; }
 .rule-grid { gap: 16px; }
 .rule-card { border-color: #e0e7f0; border-radius: 12px; background: linear-gradient(145deg,#fff,#f8fafc); transition: transform .18s ease, box-shadow .18s ease; }
 .rule-card:hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(35,65,105,.08); }
+.rule-card-top button { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 7px; transition: background .14s; }
+.rule-card-top button:hover { background: var(--primary-bg); }
+.rule-card footer { align-items: center; }
+.rule-state { display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px; border-radius: 999px; font-weight: 600; font-size: 11px; }
+.rule-state::before { content: ""; width: 6px; height: 6px; border-radius: 50%; }
+.rule-state.on { color: #047857; background: #e7f6ef; }
+.rule-state.on::before { background: #10b981; }
+.rule-state.off { color: #94a3b8; background: #eef1f5; }
+.rule-state.off::before { background: #cbd5e1; }
+.modal-action-left { margin-right: auto; }
 .template-layout { grid-template-columns: minmax(330px,.9fr) minmax(0,1.45fr); gap: 22px; }
 .template-card { border-radius: 12px; }
 .template-card.selected { border-color: #79a8ec; box-shadow: 0 0 0 4px rgba(59,130,246,.09), 0 12px 28px rgba(38,76,125,.08); }

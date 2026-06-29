@@ -227,6 +227,9 @@ html[data-theme="dark"] { background: var(--bg); }
 [data-theme="dark"] .setting-heading > span,
 [data-theme="dark"] .empty-icon,
 [data-theme="dark"] .flow-icon { background: var(--primary-bg); color: var(--primary-light); }
+[data-theme="dark"] .rule-card-top button:hover { background: var(--primary-bg); }
+[data-theme="dark"] .rule-state.on { color: #6ee7b7; background: rgba(16,185,129,.14); }
+[data-theme="dark"] .rule-state.off { color: #8aa0b8; background: rgba(148,163,184,.16); }
 
 /* ===== レビュー（送信前確認）===== */
 [data-theme="dark"] .target-card,
