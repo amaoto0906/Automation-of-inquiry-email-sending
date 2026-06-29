@@ -249,11 +249,27 @@ html[data-theme="dark"] { background: var(--bg); }
 /* カード本体と右フォーム面をダークに（左ブランド面は両テーマ共通のグラデーション） */
 [data-theme="dark"] .auth-card { background: #111727; border-color: rgba(255,255,255,.07); box-shadow: 0 44px 110px -30px rgba(0,0,0,.7); }
 [data-theme="dark"] .auth-form { background: #111727; }
-[data-theme="dark"] .auth-art { opacity: 0.34; }
 [data-theme="dark"] .login-card h2 { color: var(--text); }
 [data-theme="dark"] .login-description { color: var(--text-muted); }
 [data-theme="dark"] .input-with-icon { background: var(--surface-2); }
 [data-theme="dark"] .form-error { background: var(--danger-bg); border-color: #5a2233; color: #fda4af; }
+
+/* ===== 新規登録・承認・プロフィール（ダーク） ===== */
+[data-theme="dark"] .register-title,
+[data-theme="dark"] .register-verify-head h2,
+[data-theme="dark"] .register-done h2 { color: var(--text); }
+[data-theme="dark"] .register-switch,
+[data-theme="dark"] .register-back,
+[data-theme="dark"] .register-done p { color: var(--text-muted); }
+[data-theme="dark"] .req { background: var(--primary-bg); color: #93c5fd; }
+[data-theme="dark"] .dev-code-note { background: var(--warning-bg); border-color: #5a4717; color: #fcd34d; }
+[data-theme="dark"] .dev-code-note strong { color: #fcd34d; }
+[data-theme="dark"] .register-done-icon { background: var(--success-bg); color: #6ee7b7; }
+[data-theme="dark"] .approval-section { background: linear-gradient(180deg, #221c10, var(--surface)); border-color: #4a3a17; }
+[data-theme="dark"] .approval-item { background: var(--surface-2); border-color: var(--border); }
+[data-theme="dark"] .approval-item strong { color: var(--text); }
+[data-theme="dark"] .input-with-icon.disabled { background: #0f1626; }
+[data-theme="dark"] .input-with-icon.disabled input { color: var(--text-faint); }
 
 /* ===== 空状態・ローディング ===== */
 [data-theme="dark"] .empty-state h3 { color: var(--text); }

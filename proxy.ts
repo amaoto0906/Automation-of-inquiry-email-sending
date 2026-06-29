@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifySession } from "@/lib/auth/session";
 
-const publicPaths = ["/login", "/api/auth/login"];
+const publicPaths = [
+  "/login",
+  "/register",
+  "/api/auth/login",
+  "/api/auth/register",
+  "/api/auth/verify",
+  "/api/auth/resend",
+];
 
 // 管理者専用ページ（メンバーはダッシュボードへリダイレクト）
 const adminPagePaths = ["/users", "/settings", "/sheet-sync"];

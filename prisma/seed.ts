@@ -14,12 +14,23 @@ async function main() {
   const adminHash = await bcrypt.hash("Admin2026!", 12);
   const admin = await prisma.user.upsert({
     where: { email: "admin@outreach-hub.jp" },
-    update: {},
+    update: {
+      status: "active", emailVerified: true, isActive: true,
+      company: "株式会社サンプル", department: "営業推進部", position: "マネージャー", phone: "03-0000-0000",
+    },
     create: {
       email: "admin@outreach-hub.jp",
       name: "システム管理者",
       passwordHash: adminHash,
       role: "admin",
+      status: "active",
+      emailVerified: true,
+      isActive: true,
+      approvedAt: new Date(),
+      company: "株式会社サンプル",
+      department: "営業推進部",
+      position: "マネージャー",
+      phone: "03-0000-0000",
     },
   });
 
@@ -27,12 +38,23 @@ async function main() {
   const memberHash = await bcrypt.hash("Member2026!", 12);
   const member = await prisma.user.upsert({
     where: { email: "member@outreach-hub.jp" },
-    update: {},
+    update: {
+      status: "active", emailVerified: true, isActive: true,
+      company: "田中商事株式会社", department: "営業部", position: "主任", phone: "06-0000-0000",
+    },
     create: {
       email: "member@outreach-hub.jp",
       name: "田中 太郎",
       passwordHash: memberHash,
       role: "member",
+      status: "active",
+      emailVerified: true,
+      isActive: true,
+      approvedAt: new Date(),
+      company: "田中商事株式会社",
+      department: "営業部",
+      position: "主任",
+      phone: "06-0000-0000",
     },
   });
 

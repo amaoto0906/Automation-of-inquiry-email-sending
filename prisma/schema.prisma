@@ -15,6 +15,16 @@ model User {
   passwordHash  String
   role          String   @default("member") // admin | member
   isActive      Boolean  @default(true)
+  // 新規登録・承認フロー
+  status        String   @default("active") // pending_verification | pending | active | rejected
+  emailVerified Boolean  @default(false)
+  rejectedReason String?
+  approvedAt    DateTime?
+  // プロフィール（差出人情報。問い合わせ文面に利用）
+  company       String?
+  department    String?
+  position      String?
+  phone         String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -23,6 +33,20 @@ model User {
   activityLogs    ActivityLog[]
   loginLogs       LoginLog[]
   reviewActions   ReviewAction[]
+}
+
+// メール認証コード（6桁・2段階認証）
+model VerificationCode {
+  id         String    @id @default(cuid())
+  email      String
+  codeHash   String
+  purpose    String    @default("register") // register
+  expiresAt  DateTime
+  attempts   Int       @default(0)
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([email])
 }
 
 // 検索キーワード

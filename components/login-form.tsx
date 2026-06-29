@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, LoaderCircle, LockKeyhole, Mail } from "lucide-react";
 
@@ -61,6 +62,7 @@ export function LoginForm() {
         {loading ? "確認しています…" : "安全にログイン"}
       </button>
       <p className="demo-note">デモ環境：入力済みの認証情報でログインできます</p>
+      <p className="register-switch">アカウントをお持ちでない方は <Link href="/register">新規登録</Link></p>
     </form>
   );
 }

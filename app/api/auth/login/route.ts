@@ -13,8 +13,7 @@ export async function POST(request: NextRequest) {
     const user = await prisma.user.findUnique({ where: { email } });
     const ip = request.headers.get("x-forwarded-for") || "unknown";
 
-    if (!user || !user.isActive) {
-      if (user) await prisma.loginLog.create({ data: { userId: user.id, success: false, ipAddress: ip } });
+    if (!user) {
       return NextResponse.json({ message: "メールアドレスまたはパスワードが正しくありません" }, { status: 401 });
     }
 
@@ -23,6 +22,20 @@ export async function POST(request: NextRequest) {
 
     if (!valid) {
       return NextResponse.json({ message: "メールアドレスまたはパスワードが正しくありません" }, { status: 401 });
+    }
+
+    // アカウント状態のチェック（パスワード照合後に状態別メッセージを返す）
+    if (user.status === "pending_verification") {
+      return NextResponse.json({ message: "メールアドレスの確認が完了していません。登録時に届いた確認コードで認証してください。" }, { status: 403 });
+    }
+    if (user.status === "pending") {
+      return NextResponse.json({ message: "アカウントは管理者の承認待ちです。承認後にログインできます。" }, { status: 403 });
+    }
+    if (user.status === "rejected") {
+      return NextResponse.json({ message: "この登録は承認されませんでした。管理者にお問い合わせください。" }, { status: 403 });
+    }
+    if (!user.isActive || user.status !== "active") {
+      return NextResponse.json({ message: "このアカウントは現在利用できません。管理者にお問い合わせください。" }, { status: 403 });
     }
 
     const token = await createSession({ id: user.id, email: user.email, name: user.name, role: user.role });

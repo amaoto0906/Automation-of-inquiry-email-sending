@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/session";
-import { LockKeyhole, MousePointerClick, Search, Sheet, ShieldCheck, Sparkles } from "lucide-react";
+import { CircleCheckBig, LockKeyhole, ScanSearch, Search, ShieldCheck, Sparkles } from "lucide-react";
 import { LoginForm } from "@/components/login-form";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Logo } from "@/components/logo";
@@ -18,18 +18,6 @@ export default async function LoginPage() {
 
       <div className="auth-card">
         <aside className="auth-aside">
-          <Image
-            className="auth-art"
-            src="/assets/generated/webp/login-security-visual.webp"
-            alt=""
-            width={1200}
-            height={800}
-            loading="lazy"
-            quality={55}
-            sizes="(max-width: 820px) 0px, 30vw"
-            aria-hidden="true"
-          />
-
           <div className="login-brand">
             <Logo size={44} />
             <strong>Outreach Hub</strong>
@@ -37,14 +25,81 @@ export default async function LoginPage() {
 
           <div className="auth-copy">
             <span className="showcase-label"><Sparkles size={14} /> Intelligent Outreach Control Center</span>
-            <h1>問い合わせ送信業務を、<br />安全に、スマートに。</h1>
-            <p>キーワード検索から問い合わせフォームの検出、送信前の確認、履歴管理まで。営業の問い合わせ業務をひとつの画面で完結します。</p>
-            <ul className="feature-list">
-              <li><Search size={17} /><span>キーワードで問い合わせ先を自動収集</span></li>
-              <li><ShieldCheck size={17} /><span>送信前確認を必須化し、誤送信を防止</span></li>
-              <li><MousePointerClick size={17} /><span>CAPTCHA検出時は手動確認へ自動振り分け</span></li>
-              <li><Sheet size={17} /><span>送信結果をGoogleスプレッドシートへ同期</span></li>
-            </ul>
+            <h1>見込み企業との接点を、<br />3ステップで見つける。</h1>
+            <p>キーワード検索からフォーム検出、送信前確認まで。Outreach Hubなら、問い合わせ業務を安全にひとつの流れへまとめられます。</p>
+
+            <section className="login-walkthrough" aria-label="Outreach Hubの利用方法">
+              <div className="walkthrough-slides">
+                <article className="walkthrough-stage walkthrough-stage-1">
+                  <div className="walkthrough-visual">
+                    <Image
+                      src="/assets/generated/webp/login-step-google-search.webp"
+                      alt="Googleで「製造業 東京」と検索し、候補企業を探している画面"
+                      width={960}
+                      height={720}
+                      preload
+                      sizes="(max-width: 820px) calc(100vw - 88px), 430px"
+                    />
+                    <span className="walkthrough-sheen" aria-hidden="true" />
+                  </div>
+                  <div className="walkthrough-caption">
+                    <span className="walkthrough-number">01</span>
+                    <div>
+                      <strong><Search size={16} />キーワードでGoogle検索</strong>
+                      <p>業種や地域を入力して、見込み企業をまとめて探します。</p>
+                    </div>
+                  </div>
+                </article>
+
+                <article className="walkthrough-stage walkthrough-stage-2">
+                  <div className="walkthrough-visual">
+                    <Image
+                      src="/assets/generated/webp/login-step-form-detection.webp"
+                      alt="企業サイトを解析し、お問い合わせフォームを自動検出している画面"
+                      width={960}
+                      height={720}
+                      loading="lazy"
+                      sizes="(max-width: 820px) calc(100vw - 88px), 430px"
+                    />
+                    <span className="walkthrough-scan" aria-hidden="true" />
+                  </div>
+                  <div className="walkthrough-caption">
+                    <span className="walkthrough-number">02</span>
+                    <div>
+                      <strong><ScanSearch size={16} />フォームを自動で発見</strong>
+                      <p>候補サイトを巡回し、お問い合わせ窓口を見つけます。</p>
+                    </div>
+                  </div>
+                </article>
+
+                <article className="walkthrough-stage walkthrough-stage-3">
+                  <div className="walkthrough-visual">
+                    <Image
+                      src="/assets/generated/webp/login-step-safe-send.webp"
+                      alt="問い合わせ内容を確認して安全に送信し、結果を記録した画面"
+                      width={960}
+                      height={720}
+                      loading="lazy"
+                      sizes="(max-width: 820px) calc(100vw - 88px), 430px"
+                    />
+                    <span className="walkthrough-success-pulse" aria-hidden="true" />
+                  </div>
+                  <div className="walkthrough-caption">
+                    <span className="walkthrough-number">03</span>
+                    <div>
+                      <strong><CircleCheckBig size={16} />確認して、安全に送信</strong>
+                      <p>内容を承認してから送信し、結果を自動で記録します。</p>
+                    </div>
+                  </div>
+                </article>
+              </div>
+
+              <div className="walkthrough-progress" aria-hidden="true">
+                <span />
+                <span />
+                <span />
+              </div>
+            </section>
           </div>
 
           <div className="showcase-security">

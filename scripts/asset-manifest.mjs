@@ -1,6 +1,9 @@
 export const assets = [
   { name: "hero-dashboard-bg", width: 1920, height: 1080, mode: "cover" },
   { name: "login-security-visual", width: 1200, height: 800, mode: "contain" },
+  { name: "login-step-google-search", width: 960, height: 720, mode: "contain" },
+  { name: "login-step-form-detection", width: 960, height: 720, mode: "contain" },
+  { name: "login-step-safe-send", width: 960, height: 720, mode: "contain" },
   { name: "dashboard-automation-flow", width: 1200, height: 800, mode: "contain" },
   { name: "search-keyword-visual", width: 1200, height: 800, mode: "contain" },
   { name: "url-collection-visual", width: 1200, height: 800, mode: "contain" },

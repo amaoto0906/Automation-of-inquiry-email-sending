@@ -21,6 +21,7 @@ import {
   Sheet,
   ShieldCheck,
   Users,
+  UserCog,
   X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -134,7 +135,8 @@ export function AppShell({ children, user }: AppShellProps) {
       </nav>
 
       <div className="sidebar-footer">
-        <Link href="/settings" className="nav-item"><HelpCircle size={19} /><span>ヘルプ・ガイド</span></Link>
+        <Link href="/profile" className={`nav-item ${pathname === "/profile" ? "active" : ""}`} title={collapsed ? "プロフィール" : undefined}><UserCog size={19} /><span>プロフィール</span></Link>
+        <Link href="/dashboard" className="nav-item"><HelpCircle size={19} /><span>ヘルプ・ガイド</span></Link>
         <button className="collapse-button" onClick={() => setCollapsed((value) => !value)} aria-label={collapsed ? "サイドバーを展開" : "サイドバーを折りたたむ"}>
           <PanelLeftClose size={17} />
           <span>メニューを折りたたむ</span>
@@ -161,10 +163,10 @@ export function AppShell({ children, user }: AppShellProps) {
             <span className="sync-pill"><span />シート同期済み</span>
             <ThemeToggle />
             <button className="icon-button" aria-label="通知"><Bell size={19} /><i /></button>
-            <div className="header-user">
+            <Link href="/profile" className="header-user" title="プロフィール">
               <UserAvatar initials={initials} />
               <div><strong>{displayName}</strong><span>{roleLabel}</span></div>
-            </div>
+            </Link>
             <button className="icon-button" onClick={logout} aria-label="ログアウト" title="ログアウト"><LogOut size={19} /></button>
           </div>
         </header>

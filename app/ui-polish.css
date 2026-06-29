@@ -411,6 +411,45 @@ tbody tr:hover td { background: #f8fbff; }
 .login-button { min-height: 48px; border-radius: 12px; background: linear-gradient(135deg, #2f6feb, #2454cf); box-shadow: 0 12px 26px rgba(37,99,235,.28); }
 .login-button:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 16px 32px rgba(37,99,235,.34); }
 
+/* ===== 新規登録・認証・プロフィール・承認 ===== */
+.auth-card-wide { width: min(1120px, 100%); }
+.register-card { max-width: 400px; }
+.register-title { font-size: 24px; font-weight: 800; letter-spacing: -.02em; }
+.register-fields { gap: 14px; }
+.register-fields .field label { display: flex; align-items: center; gap: 6px; }
+.req { font-size: 9.5px; font-weight: 700; color: #2563eb; background: #eaf2ff; padding: 1px 6px; border-radius: 6px; }
+.register-switch { font-size: 12.5px; color: #65758f; text-align: center; margin-top: 2px; }
+.register-switch a { color: #2563eb; font-weight: 700; }
+.register-back { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; color: #65758f; font-weight: 600; margin-bottom: 4px; }
+.register-back:hover { color: #2563eb; }
+.register-verify-head { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 6px; margin-bottom: 6px; }
+.register-verify-head .login-lock { margin: 0 auto 6px; }
+.register-verify-head h2 { font-size: 21px; font-weight: 800; }
+.register-resend { align-self: center; margin-top: 2px; }
+.otp-input { width: 100%; text-align: center; font-size: 26px; font-weight: 800; letter-spacing: .42em; padding: 12px; font-feature-settings: "tnum"; }
+.dev-code-note { font-size: 12.5px; color: #92400e; background: #fff8eb; border: 1px solid #fde68a; border-radius: 10px; padding: 10px 12px; text-align: center; }
+.dev-code-note strong { font-size: 17px; letter-spacing: .2em; color: #b45309; }
+.register-done { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 8px 0; }
+.register-done-icon { display: flex; width: 72px; height: 72px; align-items: center; justify-content: center; color: #059669; background: #ecfdf5; border-radius: 50%; }
+.register-done h2 { font-size: 21px; font-weight: 800; }
+.register-done p { color: #5a6e8c; font-size: 14px; line-height: 1.8; }
+.register-done .login-button { margin-top: 8px; }
+
+/* 承認待ちセクション */
+.approval-section { border: 1px solid #fde2b0; background: linear-gradient(180deg, #fffdf8, #fff); }
+.approval-list { display: flex; flex-direction: column; gap: 12px; }
+.approval-item { display: flex; align-items: center; gap: 14px; padding: 16px; border: 1px solid #ecd9b3; border-radius: 14px; background: #fff; }
+.approval-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.approval-info strong { font-size: 15px; }
+.approval-meta { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #5a6783; }
+.approval-sub { font-size: 12px; color: #93a1b6; }
+.approval-actions { display: flex; gap: 8px; flex: 0 0 auto; }
+
+/* プロフィール */
+.profile-side { display: flex; flex-direction: column; gap: 20px; }
+.input-with-icon.disabled { background: #f3f5f9; opacity: .8; }
+.input-with-icon.disabled input { color: #8794ab; }
+
 /* レスポンシブ：左面を上部バンドに（〜820px） */
 @media (max-width: 820px) {
   .login-page { padding: 16px; }
@@ -698,4 +737,131 @@ tbody tr:hover td { background: #f8fbff; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+
+
+/* ===== Login walkthrough showcase ===== */
+.auth-aside {
+  justify-content: flex-start; gap: 20px;
+  padding: clamp(30px, 2.8vw, 44px);
+}
+.auth-aside::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(420px 300px at 80% 56%, rgba(77,214,255,.16), transparent 70%);
+}
+.auth-aside .login-brand { margin: 0; }
+.auth-copy { flex: 1; min-height: 0; }
+.auth-copy > p { font-size: 13px; line-height: 1.7; max-width: 430px; margin-bottom: 16px; }
+.auth-aside .showcase-security { margin-top: 0; }
+.login-walkthrough { position: relative; width: 100%; margin-top: auto; }
+.walkthrough-slides { position: relative; height: 272px; }
+.walkthrough-stage {
+  position: absolute; inset: 0;
+  display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: 10px;
+  opacity: 0; transform: translateX(24px) scale(.985); pointer-events: none;
+  animation: walkthroughCycle 18s cubic-bezier(.22,1,.36,1) infinite both;
+}
+.walkthrough-stage-1 { animation-delay: 0s; }
+.walkthrough-stage-2 { animation-delay: -12s; }
+.walkthrough-stage-3 { animation-delay: -6s; }
+.walkthrough-visual {
+  position: relative; min-height: 0; overflow: hidden; isolation: isolate;
+  border: 1px solid rgba(255,255,255,.2); border-radius: 17px;
+  background: rgba(4,15,48,.42);
+  box-shadow: 0 22px 46px -22px rgba(0,0,0,.72), inset 0 1px rgba(255,255,255,.1);
+}
+.walkthrough-visual::after {
+  content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background: linear-gradient(180deg, transparent 62%, rgba(2,11,35,.18));
+}
+.walkthrough-visual img {
+  width: 100%; height: 100%; display: block; object-fit: cover;
+  transform: scale(1.01);
+  animation: walkthroughImageDrift 6s ease-out infinite both;
+}
+.walkthrough-caption { display: flex; align-items: center; gap: 11px; min-height: 52px; }
+.walkthrough-number {
+  display: grid; place-items: center; flex: 0 0 auto;
+  width: 40px; height: 40px; border: 1px solid rgba(158,213,255,.34); border-radius: 13px;
+  color: #dff7ff; background: rgba(112,199,255,.12); backdrop-filter: blur(8px);
+  font-size: 11px; font-weight: 800; letter-spacing: .08em;
+}
+.walkthrough-caption strong { display: flex; align-items: center; gap: 7px; color: #fff; font-size: 13px; line-height: 1.35; }
+.walkthrough-caption strong svg { color: #75e6ff; flex: 0 0 auto; }
+.walkthrough-caption p { margin-top: 3px; color: rgba(210,225,249,.72); font-size: 11.5px; line-height: 1.4; }
+.walkthrough-sheen {
+  position: absolute; z-index: 3; top: -40%; bottom: -40%; left: -28%; width: 18%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.2), transparent);
+  filter: blur(3px); transform: rotate(14deg);
+  animation: walkthroughSheen 6s 1.2s ease-in-out infinite;
+}
+.walkthrough-scan {
+  position: absolute; z-index: 3; left: 3%; right: 3%; top: 12%; height: 2px;
+  background: linear-gradient(90deg, transparent, #7cf4ff 16%, #fff 50%, #7cf4ff 84%, transparent);
+  box-shadow: 0 0 12px #32d9ff, 0 7px 22px rgba(64,225,255,.48);
+  animation: walkthroughScan 3s ease-in-out infinite alternate;
+}
+.walkthrough-success-pulse {
+  position: absolute; z-index: 3; width: 54px; height: 54px; right: 22%; top: 30%;
+  border: 1px solid rgba(110,255,190,.72); border-radius: 50%;
+  box-shadow: 0 0 0 0 rgba(52,211,153,.42);
+  animation: walkthroughSuccess 2.2s ease-out infinite;
+}
+.walkthrough-progress { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin-top: 10px; }
+.walkthrough-progress span { height: 3px; overflow: hidden; border-radius: 999px; background: rgba(255,255,255,.16); }
+.walkthrough-progress span::after {
+  content: ""; display: block; width: 100%; height: 100%; border-radius: inherit;
+  background: linear-gradient(90deg, #6ee7f9, #a7f3d0);
+  transform: scaleX(0); transform-origin: left;
+  animation: walkthroughProgress 18s linear infinite both;
+}
+.walkthrough-progress span:nth-child(1)::after { animation-delay: 0s; }
+.walkthrough-progress span:nth-child(2)::after { animation-delay: -12s; }
+.walkthrough-progress span:nth-child(3)::after { animation-delay: -6s; }
+@keyframes walkthroughCycle {
+  0% { opacity: 0; transform: translateX(24px) scale(.985); }
+  3%, 27% { opacity: 1; transform: translateX(0) scale(1); }
+  31% { opacity: 0; transform: translateX(-18px) scale(.99); }
+  31.01%, 96% { opacity: 0; transform: translateX(24px) scale(.985); }
+  100% { opacity: 0; transform: translateX(24px) scale(.985); }
+}
+@keyframes walkthroughProgress {
+  0% { transform: scaleX(0); opacity: 1; }
+  27% { transform: scaleX(1); opacity: 1; }
+  31%, 100% { transform: scaleX(1); opacity: 0; }
+}
+@keyframes walkthroughImageDrift {
+  from { transform: scale(1.01) translate3d(0, 0, 0); }
+  to { transform: scale(1.055) translate3d(-.5%, -.5%, 0); }
+}
+@keyframes walkthroughSheen {
+  0%, 22% { transform: translateX(0) rotate(14deg); opacity: 0; }
+  36% { opacity: .8; }
+  64%, 100% { transform: translateX(780%) rotate(14deg); opacity: 0; }
+}
+@keyframes walkthroughScan {
+  from { top: 16%; opacity: .55; }
+  to { top: 84%; opacity: 1; }
+}
+@keyframes walkthroughSuccess {
+  0% { transform: scale(.72); opacity: 0; box-shadow: 0 0 0 0 rgba(52,211,153,.42); }
+  28% { opacity: .9; }
+  100% { transform: scale(1.34); opacity: 0; box-shadow: 0 0 0 18px rgba(52,211,153,0); }
+}
+@media (max-width: 820px) {
+  .auth-aside { padding: 26px 28px 22px; gap: 14px; }
+  .auth-copy > p, .auth-aside .showcase-security { display: none; }
+  .login-walkthrough { margin-top: 16px; }
+  .walkthrough-slides { height: 190px; }
+  .walkthrough-caption { min-height: 42px; }
+  .walkthrough-caption p { display: none; }
+  .walkthrough-progress { margin-top: 8px; }
+}
+@media (max-width: 380px) {
+  .walkthrough-slides { height: 174px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .walkthrough-stage { display: none; animation: none !important; }
+  .walkthrough-stage-1 { display: grid; opacity: 1; transform: none; }
+  .walkthrough-progress span::after { display: none; }
 }
