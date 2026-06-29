@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40" fill="none" role="img" aria-label="Outreach Hub">
+  <defs>
+    <linearGradient id="ohGrad" x1="3" y1="2" x2="37" y2="38" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4f8df9"/>
+      <stop offset="0.52" stop-color="#2563eb"/>
+      <stop offset="1" stop-color="#0ea5c4"/>
+    </linearGradient>
+    <linearGradient id="ohSheen" x1="20" y1="0" x2="20" y2="24" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffffff" stop-opacity="0.30"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="40" height="40" rx="12" fill="url(#ohGrad)"/>
+  <rect width="40" height="40" rx="12" fill="url(#ohSheen)"/>
+  <circle cx="11.5" cy="28.5" r="1.9" fill="#86efc5"/>
+  <path d="M30.6 9.8 L10.2 18.4 a0.9 0.9 0 0 0 0.05 1.7 L18.3 21.4 Z" fill="#ffffff" stroke-linejoin="round"/>
+  <path d="M30.6 9.8 L18.3 21.4 L20.4 30.2 a0.9 0.9 0 0 0 1.66 0.14 Z" fill="#cfe4ff" stroke-linejoin="round"/>
+</svg>
