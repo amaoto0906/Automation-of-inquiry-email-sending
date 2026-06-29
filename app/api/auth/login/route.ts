@@ -34,7 +34,8 @@ export async function POST(request: NextRequest) {
     if (user.status === "rejected") {
       return NextResponse.json({ message: "この登録は承認されませんでした。管理者にお問い合わせください。" }, { status: 403 });
     }
-    if (!user.isActive || user.status !== "active") {
+    // status が active 以外（不明な状態）は不可。無効化機能は廃止したため status を正とする。
+    if (user.status !== "active") {
       return NextResponse.json({ message: "このアカウントは現在利用できません。管理者にお問い合わせください。" }, { status: 403 });
     }
 

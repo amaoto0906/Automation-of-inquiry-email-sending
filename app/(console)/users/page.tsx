@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Building2, Check, Clock, Plus, ShieldCheck, UserCheck, UsersRound, X, Eye, EyeOff } from "lucide-react";
+import { Building2, Check, Clock, Plus, RotateCcw, ShieldCheck, Trash2, UserCheck, UsersRound, X, Eye, EyeOff } from "lucide-react";
 import { ActionButton } from "@/components/action-button";
 import { PageTitle, UserAvatar } from "@/components/ui";
 
@@ -38,13 +38,19 @@ export default function UsersPage() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [rejectFor, setRejectFor] = useState<User | null>(null);
   const [rejectReason, setRejectReason] = useState("");
+  const [deleteFor, setDeleteFor] = useState<User | null>(null);
+  const [deleteError, setDeleteError] = useState("");
+  const [meId, setMeId] = useState<string | null>(null);
 
   async function fetchUsers() {
     const res = await fetch("/api/users");
     if (res.ok) setUsers((await res.json()).users ?? []);
     setLoading(false);
   }
-  useEffect(() => { fetchUsers(); }, []);
+  useEffect(() => {
+    fetchUsers();
+    fetch("/api/profile").then(async (r) => { if (r.ok) setMeId((await r.json()).user?.id ?? null); });
+  }, []);
 
   async function handleInvite(e: React.FormEvent) {
     e.preventDefault();
@@ -63,7 +69,7 @@ export default function UsersPage() {
     setSaving(false);
   }
 
-  async function decide(id: string, action: "approve" | "reject", reason?: string) {
+  async function decide(id: string, action: "approve" | "reject" | "reconsider", reason?: string) {
     setBusyId(id);
     await fetch(`/api/users/${id}/approval`, {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action, reason }),
@@ -74,11 +80,18 @@ export default function UsersPage() {
     fetchUsers();
   }
 
-  async function toggleActive(id: string, current: boolean) {
-    await fetch(`/api/users/${id}`, {
-      method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ isActive: !current }),
-    });
-    fetchUsers();
+  async function deleteUser(id: string) {
+    setBusyId(id);
+    setDeleteError("");
+    const res = await fetch(`/api/users/${id}`, { method: "DELETE" });
+    setBusyId(null);
+    if (res.ok) {
+      setDeleteFor(null);
+      fetchUsers();
+    } else {
+      const d = await res.json().catch(() => ({}));
+      setDeleteError(d.error ?? "削除に失敗しました。");
+    }
   }
 
   const pending = users.filter(u => u.status === "pending");
@@ -146,9 +159,18 @@ export default function UsersPage() {
                       <td><span className={`status-badge ${st.cls}`}><span className="status-dot" />{st.label}</span></td>
                       <td>{new Date(u.createdAt).toLocaleDateString("ja-JP")}</td>
                       <td>
-                        {u.status === "active" && (
-                          <button className="row-action text-link" onClick={() => toggleActive(u.id, u.isActive)}>{u.isActive ? "無効化" : "有効化"}</button>
-                        )}
+                        <div className="row-actions">
+                          {u.status === "rejected" && (
+                            <button className="row-reconsider" onClick={() => decide(u.id, "reconsider")} disabled={busyId === u.id} aria-label={`${u.name}を再確認`}>
+                              <RotateCcw size={14} />再確認
+                            </button>
+                          )}
+                          {u.id !== meId && (
+                            <button className="row-delete" onClick={() => { setDeleteError(""); setDeleteFor(u); }} aria-label={`${u.name}を削除`}>
+                              <Trash2 size={15} />削除
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
@@ -198,6 +220,26 @@ export default function UsersPage() {
               <div className="modal-actions">
                 <ActionButton variant="danger" loading={busyId === rejectFor.id} onClick={() => decide(rejectFor.id, "reject", rejectReason)}>却下する</ActionButton>
                 <ActionButton type="button" variant="secondary" onClick={() => setRejectFor(null)}>キャンセル</ActionButton>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 削除確認モーダル */}
+      {deleteFor && (
+        <div className="modal-backdrop">
+          <div className="modal-box panel">
+            <div className="modal-header"><h2>ユーザーを削除</h2><button onClick={() => setDeleteFor(null)} className="icon-btn"><X size={18} /></button></div>
+            <div className="modal-form">
+              {deleteError && <div className="review-alert danger">{deleteError}</div>}
+              <div className="delete-confirm">
+                <span className="delete-confirm-icon"><Trash2 size={22} /></span>
+                <p><strong>{deleteFor.name}</strong>（{deleteFor.email}）を削除します。この操作は取り消せません。ユーザーに紐づく履歴データも併せて削除されます。</p>
+              </div>
+              <div className="modal-actions">
+                <ActionButton variant="danger" loading={busyId === deleteFor.id} icon={<Trash2 size={15} />} onClick={() => deleteUser(deleteFor.id)}>削除する</ActionButton>
+                <ActionButton type="button" variant="secondary" onClick={() => setDeleteFor(null)}>キャンセル</ActionButton>
               </div>
             </div>
           </div>

@@ -12,6 +12,22 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
   const target = await prisma.user.findUnique({ where: { id } });
   if (!target) return NextResponse.json({ error: "ユーザーが見つかりません。" }, { status: 404 });
+
+  // 再確認：却下済みユーザーを承認待ちへ戻す
+  if (action === "reconsider") {
+    if (target.status !== "rejected") {
+      return NextResponse.json({ error: "却下されたユーザーのみ再確認できます。" }, { status: 400 });
+    }
+    const user = await prisma.user.update({
+      where: { id },
+      data: { status: "pending", rejectedReason: null },
+      select: { id: true, name: true, email: true, status: true },
+    });
+    await logActivity(admin.id, "user_reconsidered", id, `ユーザー「${user.name}」を再確認（承認待ちへ戻す）`);
+    return NextResponse.json({ ok: true, user });
+  }
+
+  // 承認・却下は承認待ち状態が対象
   if (target.status !== "pending") {
     return NextResponse.json({ error: "このユーザーは承認待ち状態ではありません。" }, { status: 400 });
   }
@@ -38,5 +54,5 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     return NextResponse.json({ ok: true, user });
   }
 
-  return NextResponse.json({ error: "action は approve または reject を指定してください。" }, { status: 400 });
+  return NextResponse.json({ error: "action は approve / reject / reconsider を指定してください。" }, { status: 400 });
 }

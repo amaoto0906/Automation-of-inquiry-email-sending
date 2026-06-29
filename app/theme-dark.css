@@ -281,6 +281,11 @@ html[data-theme="dark"] { background: var(--bg); }
 [data-theme="dark"] .approval-item strong { color: var(--text); }
 [data-theme="dark"] .input-with-icon.disabled { background: #0f1626; }
 [data-theme="dark"] .input-with-icon.disabled input { color: var(--text-faint); }
+[data-theme="dark"] .row-reconsider { color: #93c5fd; }
+[data-theme="dark"] .row-reconsider:hover { background: var(--primary-bg); }
+[data-theme="dark"] .row-delete { color: #fb7185; }
+[data-theme="dark"] .row-delete:hover { background: var(--danger-bg); }
+[data-theme="dark"] .delete-confirm-icon { background: var(--danger-bg); color: #fb7185; }
 
 /* ===== 空状態・ローディング ===== */
 [data-theme="dark"] .empty-state h3 { color: var(--text); }
