@@ -1,0 +1,268 @@
+/* ============================================================
+   ダークテーマ（黒）  —  [data-theme="dark"]
+   globals.css / ui-polish.css の後に読み込み、上書きする層
+   ============================================================ */
+
+/* ===== トークン再定義（var() ベースの要素はこれで自動反転） ===== */
+[data-theme="dark"] {
+  --bg: #0a0e17;
+  --bg-tint: #0d1320;
+  --surface: #141b2b;
+  --surface-2: #1a2233;
+  --surface-glass: rgba(20, 27, 43, 0.72);
+  --border: #28324a;
+  --border-strong: #3a4762;
+  --text: #e6ebf5;
+  --text-muted: #9aa7c0;
+  --text-faint: #69768e;
+  --primary: #3b82f6;
+  --primary-dark: #2563eb;
+  --primary-light: #60a5fa;
+  --primary-bg: #16233f;
+  --accent: #22d3ee;
+  --accent-bg: #0e2a33;
+  --danger: #fb7185;
+  --danger-bg: #2a1722;
+  --warning: #fbbf24;
+  --warning-bg: #2a2113;
+  --success: #34d399;
+  --success-bg: #0e2a20;
+  --info: #38bdf8;
+  --info-bg: #0d2536;
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow: 0 4px 16px -4px rgba(0, 0, 0, 0.5), 0 2px 6px -2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 12px 32px -8px rgba(0, 0, 0, 0.6), 0 4px 12px -4px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 24px 60px -12px rgba(0, 0, 0, 0.7);
+  --shadow-glow: 0 8px 28px -6px rgba(37, 99, 235, 0.5);
+  --ring: 0 0 0 4px rgba(59, 130, 246, 0.25);
+}
+
+/* ===== ベース ===== */
+/* data-theme は <html> 自身に付くため html[...] で指定（[data-theme] html は不一致になる） */
+html[data-theme="dark"] { background: var(--bg); }
+[data-theme="dark"] body {
+  color: var(--text);
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(circle at 88% 2%, rgba(37, 99, 235, 0.14), transparent 26rem),
+    radial-gradient(circle at 25% 98%, rgba(34, 211, 238, 0.08), transparent 30rem);
+}
+[data-theme="dark"] ::selection { background: #2563eb; color: #fff; }
+
+/* ===== ヘッダー ===== */
+[data-theme="dark"] .top-header {
+  background: rgba(13, 19, 32, 0.82);
+  border-color: var(--border);
+}
+[data-theme="dark"] .header-context strong { color: var(--text); }
+[data-theme="dark"] .header-kicker { color: var(--primary-light); }
+[data-theme="dark"] .icon-button { color: var(--text-muted); }
+[data-theme="dark"] .icon-button:hover { background: var(--surface-2); border-color: var(--border); color: var(--text); }
+[data-theme="dark"] .icon-button i { border-color: var(--surface); }
+[data-theme="dark"] .header-user { background: var(--surface-2); border-color: var(--border); }
+[data-theme="dark"] .header-user strong { color: var(--text); }
+[data-theme="dark"] .sync-pill { background: rgba(16, 185, 129, 0.12); border-color: rgba(52, 211, 153, 0.25); color: #6ee7b7; }
+
+/* ===== ページタイトル ===== */
+[data-theme="dark"] .page-title,
+[data-theme="dark"] .review-heading {
+  background: linear-gradient(105deg, #151d30 0%, #121a2a 60%, #101627 100%);
+  border-color: var(--border);
+}
+[data-theme="dark"] .page-title h1,
+[data-theme="dark"] .review-heading h1 {
+  color: var(--text);
+  -webkit-text-fill-color: var(--text);
+  background: none;
+}
+[data-theme="dark"] .page-description,
+[data-theme="dark"] .review-heading p { color: var(--text-muted); }
+[data-theme="dark"] .page-title-visual,
+[data-theme="dark"] .review-heading-art { mix-blend-mode: normal; opacity: 0.85; filter: none; }
+
+/* ===== パネル・カード（白系サーフェスを暗転） ===== */
+[data-theme="dark"] .panel,
+[data-theme="dark"] .summary-strip,
+[data-theme="dark"] .sheet-connection,
+[data-theme="dark"] .sheet-stat,
+[data-theme="dark"] .completion-card {
+  background: var(--surface);
+  border-color: var(--border);
+}
+[data-theme="dark"] .panel:hover { border-color: var(--border-strong); }
+[data-theme="dark"] .stat-card { background: linear-gradient(150deg, #161e31, #131a2a); border-color: var(--border); }
+[data-theme="dark"] .mini-stats > div { background: var(--surface); border-color: var(--border); }
+[data-theme="dark"] .rule-card,
+[data-theme="dark"] .template-card,
+[data-theme="dark"] .manual-item,
+[data-theme="dark"] .sheet-card { background: linear-gradient(145deg, #161e31, #131a2a); border-color: var(--border); }
+
+/* 内側の薄いサーフェス（surface-2 相当） */
+[data-theme="dark"] .today-progress,
+[data-theme="dark"] .safety-list li,
+[data-theme="dark"] .target-details,
+[data-theme="dark"] .preview-field,
+[data-theme="dark"] .keyword-settings div,
+[data-theme="dark"] .setting-toggle,
+[data-theme="dark"] .sync-row,
+[data-theme="dark"] .user-row,
+[data-theme="dark"] .message-preview,
+[data-theme="dark"] .confirm-check,
+[data-theme="dark"] .rule-card,
+[data-theme="dark"] .modal-body .field input {
+  background: var(--surface-2);
+  border-color: var(--border);
+}
+[data-theme="dark"] .progress-track { background: #1f2940; }
+
+/* ===== 見出し・本文テキスト（コンテンツ領域のみ。サイドバーは元から暗色なので除外） ===== */
+[data-theme="dark"] .main-column h1,
+[data-theme="dark"] .main-column h2,
+[data-theme="dark"] .main-column h3,
+[data-theme="dark"] .section-header h2,
+[data-theme="dark"] .stat-card strong,
+[data-theme="dark"] .mini-stats strong,
+[data-theme="dark"] .summary-strip strong,
+[data-theme="dark"] .sheet-stat strong,
+[data-theme="dark"] .primary-cell strong,
+[data-theme="dark"] .user-cell strong,
+[data-theme="dark"] .manual-copy h3,
+[data-theme="dark"] .rule-card h3,
+[data-theme="dark"] .target-profile h3,
+[data-theme="dark"] .preview-field strong,
+[data-theme="dark"] .sync-row strong,
+[data-theme="dark"] .target-details dd,
+[data-theme="dark"] .keyword-settings dd,
+[data-theme="dark"] .setting-toggle strong,
+[data-theme="dark"] .setting-heading h2,
+[data-theme="dark"] .field label { color: var(--text); }
+
+/* ===== ダッシュボード・ヒーロー ===== */
+[data-theme="dark"] .dashboard-hero {
+  background: linear-gradient(120deg, #10182b, #0d1626);
+  border-color: var(--border);
+}
+[data-theme="dark"] .dashboard-hero::after {
+  background: linear-gradient(90deg, rgba(13, 20, 36, 0.97) 0%, rgba(13, 20, 36, 0.85) 45%, rgba(13, 20, 36, 0.3) 82%);
+}
+[data-theme="dark"] .hero-content h2 { color: var(--text); }
+[data-theme="dark"] .hero-content p { color: var(--text-muted); }
+[data-theme="dark"] .hero-label { color: var(--primary-light); }
+[data-theme="dark"] .hero-score { background: rgba(255, 255, 255, 0.05); border-color: var(--border); }
+[data-theme="dark"] .score-ring { box-shadow: inset 0 0 0 6px #10182b; }
+[data-theme="dark"] .score-ring small, [data-theme="dark"] .hero-score p { color: var(--text-muted); }
+[data-theme="dark"] .flow-icon { background: var(--primary-bg); border-color: var(--border); }
+
+/* ===== テーブル ===== */
+[data-theme="dark"] .table-wrap { background: var(--surface); border-color: var(--border); }
+[data-theme="dark"] th { background: var(--surface-2); color: var(--text-muted); }
+[data-theme="dark"] td { border-color: var(--border); color: var(--text); }
+[data-theme="dark"] tbody tr:hover td { background: var(--surface-2); }
+[data-theme="dark"] .muted-cell, [data-theme="dark"] .last-seen { color: var(--text-muted); }
+
+/* ===== 入力・ボタン ===== */
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  background: var(--surface-2);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+[data-theme="dark"] input:hover, [data-theme="dark"] select:hover, [data-theme="dark"] textarea:hover { border-color: #4a597a; }
+[data-theme="dark"] input::placeholder, [data-theme="dark"] textarea::placeholder { color: var(--text-faint); }
+[data-theme="dark"] .input-with-icon,
+[data-theme="dark"] .search-input { background: var(--surface-2); border-color: var(--border-strong); }
+[data-theme="dark"] .button-secondary { background: var(--surface-2); border-color: var(--border-strong); color: var(--text); }
+[data-theme="dark"] .button-secondary:hover:not(:disabled) { background: #222d44; border-color: var(--primary); color: var(--primary-light); }
+[data-theme="dark"] .filter-button,
+[data-theme="dark"] .filter-chips button,
+[data-theme="dark"] .pagination button { background: var(--surface-2); border-color: var(--border); color: var(--text-muted); }
+[data-theme="dark"] .toolbar-actions select { background: var(--surface-2); }
+
+/* ===== バッジ・ステータス（淡色背景＋濃文字→暗色背景＋淡文字） ===== */
+[data-theme="dark"] .status-success, [data-theme="dark"] .timeline-icon.success { color: #6ee7b7; }
+[data-theme="dark"] .status-success { background: var(--success-bg); }
+[data-theme="dark"] .status-danger { background: var(--danger-bg); color: #fda4af; }
+[data-theme="dark"] .status-warning { background: var(--warning-bg); color: #fcd34d; }
+[data-theme="dark"] .status-info, [data-theme="dark"] .status-cyan { background: var(--info-bg); color: #7dd3fc; }
+[data-theme="dark"] .status-indigo { background: var(--primary-bg); color: #93c5fd; }
+[data-theme="dark"] .status-neutral, [data-theme="dark"] .status-muted { background: var(--surface-2); color: var(--text-muted); }
+[data-theme="dark"] .trend { background: var(--success-bg); color: #6ee7b7; }
+[data-theme="dark"] .role-badge:not(.admin) { background: var(--surface-2); color: var(--text-muted); border-color: var(--border); }
+[data-theme="dark"] .role-badge.admin { background: var(--primary-bg); color: #93c5fd; }
+[data-theme="dark"] .online-status { color: #6ee7b7; }
+[data-theme="dark"] .avatar { background: linear-gradient(145deg, #1c2740, #16223a); color: #93c5fd; border-color: var(--border); }
+
+/* ===== 情報ボックス・アラート・通知 ===== */
+[data-theme="dark"] .info-box { background: var(--info-bg); border-color: #1e4a6b; color: #7dd3fc; }
+[data-theme="dark"] .permission-note { background: var(--info-bg); border-color: #1e4a6b; color: #cfe6f7; }
+[data-theme="dark"] .permission-note p { color: var(--text-muted); }
+[data-theme="dark"] .policy-banner { background: linear-gradient(90deg, #2a2113, #1c1a12); border-color: #4a3a17; }
+[data-theme="dark"] .review-alert.success { background: linear-gradient(120deg, var(--success-bg), var(--surface)); border-color: #1e5a44; color: #6ee7b7; }
+[data-theme="dark"] .review-alert.warning { background: linear-gradient(120deg, var(--warning-bg), var(--surface)); border-color: #5a4717; color: #fcd34d; }
+[data-theme="dark"] .review-alert.danger,
+[data-theme="dark"] .inline-alert.danger { background: linear-gradient(120deg, var(--danger-bg), var(--surface)); border-color: #5a2233; color: #fda4af; }
+[data-theme="dark"] .review-alert p, [data-theme="dark"] .inline-alert p { color: var(--text-muted); }
+
+/* ===== モーダル ===== */
+[data-theme="dark"] .modal, [data-theme="dark"] .modal-box { background: var(--surface); }
+[data-theme="dark"] .modal-header, [data-theme="dark"] .modal-footer { border-color: var(--border); }
+[data-theme="dark"] .icon-btn:hover { background: var(--surface-2); color: var(--text); }
+
+/* ===== 設定・シート同期・除外ルール ===== */
+[data-theme="dark"] .settings-nav a:hover { background: var(--surface-2); }
+[data-theme="dark"] .setting-heading { border-color: var(--border); }
+[data-theme="dark"] .setting-toggle { border-color: var(--border); }
+[data-theme="dark"] .switch { background: #36425e; }
+[data-theme="dark"] .required-chip { background: var(--primary-bg); color: #93c5fd; }
+[data-theme="dark"] .sync-visual,
+[data-theme="dark"] .sheet-logo { background: rgba(16, 185, 129, 0.12); }
+[data-theme="dark"] .sync-details dl div { border-color: var(--border); }
+[data-theme="dark"] .connection-state { background: var(--success-bg); color: #6ee7b7; }
+[data-theme="dark"] .connection-state.disconnected { background: var(--surface-2); color: var(--text-faint); }
+[data-theme="dark"] .sync-progress { background: var(--primary-bg); border-color: #1e4a6b; color: #93c5fd; }
+[data-theme="dark"] .rule-card-top span,
+[data-theme="dark"] .setting-heading > span,
+[data-theme="dark"] .empty-icon,
+[data-theme="dark"] .flow-icon { background: var(--primary-bg); color: var(--primary-light); }
+
+/* ===== レビュー（送信前確認）===== */
+[data-theme="dark"] .target-card,
+[data-theme="dark"] .safety-check-panel,
+[data-theme="dark"] .approval-panel { background: var(--surface); border-color: var(--border); }
+[data-theme="dark"] .safety-check-panel li { background: var(--surface-2); border-color: var(--border); }
+[data-theme="dark"] .safety-title > span { background: var(--primary-bg); color: var(--primary-light); border-color: var(--border); }
+[data-theme="dark"] .safety-result { background: var(--success-bg); border-color: #1e5a44; color: #6ee7b7; }
+[data-theme="dark"] .safety-result.blocked { background: var(--danger-bg); border-color: #5a2233; color: #fda4af; }
+[data-theme="dark"] .confirm-check:has(input:checked) { background: var(--primary-bg); border-color: var(--primary); }
+[data-theme="dark"] .divider::before, [data-theme="dark"] .divider::after { background: var(--border); }
+[data-theme="dark"] .back-link { color: var(--text-muted); }
+
+/* ===== ログイン画面 ===== */
+[data-theme="dark"] .login-page { background: #05080f; }
+[data-theme="dark"] .login-page::before { opacity: 0.22; }
+[data-theme="dark"] .showcase-copy h1,
+[data-theme="dark"] .login-brand strong { color: var(--text); }
+[data-theme="dark"] .showcase-copy p,
+[data-theme="dark"] .feature-list span,
+[data-theme="dark"] .showcase-security { color: var(--text-muted); }
+[data-theme="dark"] .feature-list { background: rgba(255, 255, 255, 0.04); border-color: var(--border); }
+[data-theme="dark"] .login-security-art { mix-blend-mode: normal; opacity: 0.5; }
+[data-theme="dark"] .login-panel { background: rgba(17, 23, 38, 0.94); border-color: var(--border); }
+[data-theme="dark"] .login-card h2 { color: var(--text); }
+[data-theme="dark"] .login-description { color: var(--text-muted); }
+[data-theme="dark"] .input-with-icon { background: var(--surface-2); }
+[data-theme="dark"] .form-error { background: var(--danger-bg); border-color: #5a2233; color: #fda4af; }
+
+/* ===== 空状態・ローディング ===== */
+[data-theme="dark"] .empty-state h3 { color: var(--text); }
+[data-theme="dark"] .empty-image { mix-blend-mode: normal; opacity: 0.9; }
+[data-theme="dark"] .loading-state { color: var(--text-muted); }
+
+/* ログイン画面のテーマ切替ボタン（ダーク時） */
+[data-theme="dark"] .login-theme-toggle {
+  background: rgba(30, 41, 64, 0.7);
+  border-color: var(--border);
+  color: var(--text);
+}
+[data-theme="dark"] .login-theme-toggle:hover { background: var(--surface-2); color: var(--primary-light); }

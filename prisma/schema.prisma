@@ -1,0 +1,204 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ユーザー
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String
+  passwordHash  String
+  role          String   @default("member") // admin | member
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  keywords        Keyword[]
+  sendLogs        SendLog[]
+  activityLogs    ActivityLog[]
+  loginLogs       LoginLog[]
+  reviewActions   ReviewAction[]
+}
+
+// 検索キーワード
+model Keyword {
+  id              String    @id @default(cuid())
+  name            String
+  query           String
+  region          String?
+  memo            String?
+  isActive        Boolean   @default(true)
+  lastExecutedAt  DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  createdById     String
+
+  createdBy       User            @relation(fields: [createdById], references: [id])
+  searchResults   SearchResult[]
+}
+
+// 検索結果URL
+model SearchResult {
+  id             String   @id @default(cuid())
+  keywordId      String
+  url            String
+  domain         String
+  title          String?
+  snippet        String?
+  position       Int?
+  status         String   @default("pending")
+  excludeReason  String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  keyword        Keyword       @relation(fields: [keywordId], references: [id], onDelete: Cascade)
+  contactPages   ContactPage[]
+}
+
+// 問い合わせページ
+model ContactPage {
+  id                    String   @id @default(cuid())
+  searchResultId        String
+  contactUrl            String
+  estimatedCompanyName  String?
+  hasForm               Boolean  @default(false)
+  hasCaptcha            Boolean  @default(false)
+  hasNoSolicitationText Boolean  @default(false)
+  isJsHeavy             Boolean  @default(false)
+  requiresManualCheck   Boolean  @default(false)
+  status                String   @default("pending")
+  detectedFields        String?
+  screenshotPath        String?
+  errorMessage          String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  searchResult  SearchResult  @relation(fields: [searchResultId], references: [id], onDelete: Cascade)
+  formFields    FormField[]
+  sendLogs      SendLog[]
+  reviewActions ReviewAction[]
+}
+
+// フォーム入力項目
+model FormField {
+  id            String  @id @default(cuid())
+  contactPageId String
+  fieldType     String
+  label         String?
+  name          String?
+  placeholder   String?
+  isRequired    Boolean @default(false)
+  detectedAs    String?
+
+  contactPage   ContactPage @relation(fields: [contactPageId], references: [id], onDelete: Cascade)
+}
+
+// 問い合わせ文面テンプレート
+model MessageTemplate {
+  id            String   @id @default(cuid())
+  name          String
+  senderCompany String
+  senderName    String
+  senderEmail   String
+  senderPhone   String?
+  subject       String
+  body          String
+  signature     String?
+  isActive      Boolean  @default(true)
+  isDefault     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  sendLogs      SendLog[]
+}
+
+// 除外ルール
+model ExcludeRule {
+  id          String   @id @default(cuid())
+  ruleType    String   // domain | company | industry | keyword | no_solicitation
+  value       String
+  memo        String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// 送信ログ
+model SendLog {
+  id                String   @id @default(cuid())
+  contactPageId     String
+  templateId        String?
+  userId            String
+  status            String   // success | failed | manual_check | captcha | excluded | dry_run
+  isDryRun          Boolean  @default(false)
+  errorMessage      String?
+  screenshotPath    String?
+  sentAt            DateTime @default(now())
+  sheetSynced       Boolean  @default(false)
+  sheetSyncedAt     DateTime?
+
+  contactPage       ContactPage      @relation(fields: [contactPageId], references: [id])
+  template          MessageTemplate? @relation(fields: [templateId], references: [id])
+  user              User             @relation(fields: [userId], references: [id])
+}
+
+// 送信前確認操作履歴
+model ReviewAction {
+  id            String   @id @default(cuid())
+  contactPageId String
+  userId        String
+  action        String   // approved | skipped | manual_check | excluded
+  memo          String?
+  createdAt     DateTime @default(now())
+
+  contactPage   ContactPage @relation(fields: [contactPageId], references: [id])
+  user          User        @relation(fields: [userId], references: [id])
+}
+
+// アクティビティログ
+model ActivityLog {
+  id          String   @id @default(cuid())
+  userId      String
+  action      String
+  target      String?
+  detail      String?
+  ipAddress   String?
+  createdAt   DateTime @default(now())
+
+  user        User @relation(fields: [userId], references: [id])
+}
+
+// ログイン履歴
+model LoginLog {
+  id         String   @id @default(cuid())
+  userId     String
+  success    Boolean
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  user       User @relation(fields: [userId], references: [id])
+}
+
+// Google Sheets同期ログ
+model SheetSyncLog {
+  id           String   @id @default(cuid())
+  sendLogId    String?
+  status       String   // success | failed
+  rowsWritten  Int      @default(0)
+  errorMessage String?
+  createdAt    DateTime @default(now())
+}
+
+// アプリ設定
+model AppSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
