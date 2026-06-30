@@ -638,6 +638,20 @@ tbody tr.row-selected:hover td { background: #e7efff; }
 .template-card { border-radius: 12px; }
 .template-card.selected { border-color: #79a8ec; box-shadow: 0 0 0 4px rgba(59,130,246,.09), 0 12px 28px rgba(38,76,125,.08); }
 .editor-card { position: relative; overflow: hidden; }
+/* テンプレートカードのフッター削除ボタン */
+.template-card footer button.danger-link { color: #e11d48; }
+.template-card footer button.danger-link:hover { background: #fff1f3; }
+/* ⋯ メニュー */
+.template-menu-wrap { position: relative; margin-left: auto; }
+.template-menu-btn { display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 8px; color: var(--text-muted); transition: background .14s; }
+.template-menu-btn:hover { background: var(--surface-2); }
+.template-dropdown { position: absolute; right: 0; top: calc(100% + 4px); z-index: 60; min-width: 186px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 12px 36px rgba(0,0,0,.14); padding: 6px; display: flex; flex-direction: column; gap: 1px; }
+.template-dropdown button { width: 100%; text-align: left; padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--text); transition: background .13s; }
+.template-dropdown button:hover { background: var(--surface-2); }
+.template-dropdown button.danger { color: #e11d48; }
+.template-dropdown button.danger:hover { background: #fff1f3; }
+/* 編集アクションボタン列 */
+.template-edit-actions { display: flex; gap: 9px; margin-top: 6px; flex-wrap: wrap; }
 .editor-visual { height: 160px; object-fit: cover; object-position: center 46%; border-radius: 12px; }
 .manual-item { border-color: #e0e8f1; border-radius: 12px; background: linear-gradient(90deg,#fff,#fafcff); transition: transform .17s ease, box-shadow .17s ease; }
 .manual-item:hover { transform: translateX(2px); box-shadow: 0 10px 24px rgba(30,60,100,.07); }

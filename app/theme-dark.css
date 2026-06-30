@@ -99,6 +99,13 @@ html[data-theme="dark"] { background: var(--bg); }
 [data-theme="dark"] .manual-item.row-selected { background: var(--primary-bg); border-color: var(--primary); }
 [data-theme="dark"] .manual-item-del { color: var(--text-faint); }
 [data-theme="dark"] .manual-item-del:hover { background: var(--danger-bg); color: #fb7185; }
+[data-theme="dark"] .template-dropdown { background: #1a2236; border-color: var(--border); }
+[data-theme="dark"] .template-dropdown button { color: var(--text); }
+[data-theme="dark"] .template-dropdown button:hover { background: var(--surface-2); }
+[data-theme="dark"] .template-dropdown button.danger { color: #fb7185; }
+[data-theme="dark"] .template-dropdown button.danger:hover { background: var(--danger-bg); }
+[data-theme="dark"] .template-card footer button.danger-link { color: #fb7185; }
+[data-theme="dark"] .template-card footer button.danger-link:hover { background: var(--danger-bg); }
 
 /* 内側の薄いサーフェス（surface-2 相当） */
 [data-theme="dark"] .today-progress,
