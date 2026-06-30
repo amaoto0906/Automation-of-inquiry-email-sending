@@ -269,17 +269,17 @@ function IntegrationSection({ section, cfg, setField, deleteField, secretSet }: 
     <article className="panel setting-section">
       <div className="setting-heading"><span><Mail size={22} /></span><div><h2>メール送信（SMTP）</h2><p>確認コードや承認通知の実送信に使用します。未設定の場合はモック（画面表示）で動作します。</p></div></div>
       <div className="form-row">
-        <div className="field"><label htmlFor="smtp-host">SMTPホスト</label><input id="smtp-host" value={cfg.SMTP_HOST ?? ""} onChange={(e) => setField("SMTP_HOST", e.target.value)} placeholder="smtp.example.com" /><small>設定すると確認コードを実際にメール送信します。</small></div>
-        <div className="field"><label htmlFor="smtp-port">SMTPポート</label><input id="smtp-port" type="number" min={1} value={cfg.SMTP_PORT ?? "587"} onChange={(e) => setField("SMTP_PORT", e.target.value)} /><small>587（STARTTLS）/ 465（TLS）</small></div>
+        <div className="field"><label htmlFor="smtp-host">SMTPホスト</label><input id="smtp-host" value={cfg.SMTP_HOST ?? ""} onChange={(e) => setField("SMTP_HOST", e.target.value)} placeholder="smtp.gmail.com" /><small>ホスト名のみ（メールアドレス不可）。Gmailは <code>smtp.gmail.com</code>。</small></div>
+        <div className="field"><label htmlFor="smtp-port">SMTPポート</label><input id="smtp-port" type="number" min={1} max={65535} value={cfg.SMTP_PORT ?? "587"} onChange={(e) => setField("SMTP_PORT", e.target.value)} /><small>587（STARTTLS・推奨）/ 465（TLS）</small></div>
       </div>
-      <div className="field"><label htmlFor="smtp-user">SMTPユーザー</label><input id="smtp-user" value={cfg.SMTP_USER ?? ""} onChange={(e) => setField("SMTP_USER", e.target.value)} placeholder="user@example.com" /></div>
-      <SecretField id="smtp-pass" label="SMTPパスワード" placeholder="アプリパスワード等" value={cfg.SMTP_PASS ?? ""} configured={!!secretSet.SMTP_PASS} onChange={(v) => setField("SMTP_PASS", v)} onDelete={() => deleteField("SMTP_PASS", "SMTPパスワード")} help="SMTP認証のパスワード。" />
+      <div className="field"><label htmlFor="smtp-user">SMTPユーザー <span className="req">必須</span></label><input id="smtp-user" value={cfg.SMTP_USER ?? ""} onChange={(e) => setField("SMTP_USER", e.target.value)} placeholder="you@gmail.com" /><small>ログイン認証に使うメールアドレス。Gmailは全アドレスを入力。これが差出人にも使われます。</small></div>
+      <SecretField id="smtp-pass" label="SMTPパスワード" placeholder="アプリパスワード（16桁）" value={cfg.SMTP_PASS ?? ""} configured={!!secretSet.SMTP_PASS} onChange={(v) => setField("SMTP_PASS", v)} onDelete={() => deleteField("SMTP_PASS", "SMTPパスワード")} help="Gmailの場合は通常のパスワードではなく「アプリパスワード」（2段階認証を有効化後に発行する16桁）。" />
       <label className="setting-toggle">
         <div><strong>SSL/TLS を使用</strong><p>ポート465など暗黙のTLSを使う場合はオン。587（STARTTLS）はオフ。</p></div>
         <input type="checkbox" checked={(cfg.SMTP_SECURE ?? "false") === "true"} onChange={(e) => setField("SMTP_SECURE", e.target.checked ? "true" : "false")} />
         <span className="switch" />
       </label>
-      <div className="field"><label htmlFor="mail-from">差出人（From）</label><input id="mail-from" value={cfg.MAIL_FROM ?? ""} onChange={(e) => setField("MAIL_FROM", e.target.value)} placeholder="Outreach Hub <no-reply@example.jp>" /></div>
+      <div className="field"><label htmlFor="mail-from">差出人（From）<span className="opt">任意</span></label><input id="mail-from" value={cfg.MAIL_FROM ?? ""} onChange={(e) => setField("MAIL_FROM", e.target.value)} placeholder="空欄ならSMTPユーザーを使用" /><small>空欄でOK。表示名を付けたい場合のみ入力（例: Outreach Hub &lt;you@gmail.com&gt;）。Gmailは差出人＝認証アカウントになります。</small></div>
     </article>
   );
 }

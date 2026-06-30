@@ -6,8 +6,9 @@
 
 import { getSetting, getSettingOr } from "@/lib/settings";
 
-async function getSender(): Promise<string> {
-  return getSettingOr("MAIL_FROM", "Outreach Hub <no-reply@outreach-hub.jp>");
+/** ホスト名らしき文字列か（メールアドレスや空白の誤入力を弾く） */
+function looksLikeHostname(host: string): boolean {
+  return host.length > 0 && !/[@\s]/.test(host);
 }
 
 /** SMTPホストとユーザーが設定されていれば実送信可能（DB設定→env） */
@@ -23,13 +24,15 @@ interface SendResult {
 }
 
 async function sendMail(to: string, subject: string, text: string, html: string): Promise<SendResult> {
-  const [host, user, pass, port, secure] = await Promise.all([
+  const [hostRaw, user, pass, portRaw, secure, fromSetting] = await Promise.all([
     getSetting("SMTP_HOST"),
     getSetting("SMTP_USER"),
     getSetting("SMTP_PASS"),
     getSettingOr("SMTP_PORT", "587"),
     getSettingOr("SMTP_SECURE", "false"),
+    getSetting("MAIL_FROM"),
   ]);
+  const host = hostRaw?.trim() ?? null;
 
   if (!host || !user) {
     // モックモード（SMTP未設定）：実送信せずログ出力
@@ -41,15 +44,32 @@ async function sendMail(to: string, subject: string, text: string, html: string)
     return { ok: true, mock: true };
   }
 
+  // SMTPホストの形式チェック（メールアドレスの誤入力などを明確なエラーにする）
+  if (!looksLikeHostname(host)) {
+    const error = `SMTPホストの形式が正しくありません（"${host}"）。"smtp.gmail.com" のようなホスト名を指定してください（メールアドレスは「SMTPユーザー」欄に入力します）。`;
+    console.error("メール送信エラー:", error);
+    return { ok: false, mock: false, error };
+  }
+
+  // ポートとTLSの正規化。465番は暗黙TLSなので secure を自動でON。
+  const portNum = Number.parseInt(portRaw, 10);
+  const port = Number.isFinite(portNum) && portNum > 0 ? portNum : 587;
+  const useSecure = secure === "true" || port === 465;
+  // 差出人は MAIL_FROM。未設定なら認証ユーザー（Gmail等は From を認証ユーザーに一致させる必要がある）。
+  const from = (fromSetting && fromSetting.trim()) || user;
+
   try {
     const nodemailer = await import("nodemailer");
     const transport = nodemailer.createTransport({
       host,
-      port: parseInt(port, 10),
-      secure: secure === "true",
+      port,
+      secure: useSecure,
       auth: { user, pass: pass ?? undefined },
+      // 設定ミス時に長く待たされないよう接続タイムアウトを短めに
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
     });
-    await transport.sendMail({ from: await getSender(), to, subject, text, html });
+    await transport.sendMail({ from, to, subject, text, html });
     return { ok: true, mock: false };
   } catch (err) {
     console.error("メール送信エラー:", err);

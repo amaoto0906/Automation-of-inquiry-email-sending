@@ -45,6 +45,13 @@ export async function PATCH(request: NextRequest) {
       }
     } else {
       value = value.trim();
+      // SMTPホストはホスト名のみ許可（メールアドレスや空白の誤入力を弾く）
+      if (key === "SMTP_HOST" && value !== "" && /[@\s]/.test(value)) {
+        return NextResponse.json(
+          { error: "「SMTPホスト」にはメールアドレスではなくホスト名（例: smtp.gmail.com）を入力してください。メールアドレスは「SMTPユーザー」欄に入力します。" },
+          { status: 400 },
+        );
+      }
     }
 
     toSave[key] = value;

@@ -35,8 +35,14 @@ export async function POST(request: NextRequest) {
   }
 
   if (action === "request") {
-    const code = await issueVerificationCode(newEmail);
+    const { code } = await issueVerificationCode(newEmail);
     const sent = await sendEmailChangeVerification(newEmail, code);
+    if (!sent.ok && !sent.mock) {
+      return NextResponse.json(
+        { error: "確認コードのメール送信に失敗しました。SMTP設定をご確認ください。" },
+        { status: 502 },
+      );
+    }
     return NextResponse.json({ ok: true, devCode: sent.mock ? code : undefined });
   }
 

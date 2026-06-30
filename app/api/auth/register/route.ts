@@ -30,9 +30,15 @@ export async function POST(request: NextRequest) {
           where: { id: existing.id },
           data: { name, company, department, position, phone, passwordHash: await hashPassword(password) },
         });
-        const code = await issueVerificationCode(email);
+        const { code, expiresAt } = await issueVerificationCode(email);
         const sent = await sendVerificationEmail(email, code);
-        return NextResponse.json({ ok: true, email, devCode: sent.mock ? code : undefined });
+        if (!sent.ok && !sent.mock) return mailFailed();
+        return NextResponse.json({
+          ok: true,
+          email,
+          expiresAt: expiresAt.toISOString(),
+          devCode: sent.mock ? code : undefined,
+        });
       }
       return NextResponse.json({ error: "このメールアドレスは既に登録されています。" }, { status: 409 });
     }
@@ -53,12 +59,14 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    const code = await issueVerificationCode(email);
+    const { code, expiresAt } = await issueVerificationCode(email);
     const sent = await sendVerificationEmail(email, code);
+    if (!sent.ok && !sent.mock) return mailFailed();
 
     return NextResponse.json({
       ok: true,
       email,
+      expiresAt: expiresAt.toISOString(),
       // モックモード（SMTP未設定）の場合のみ、デモ用にコードを返す。実送信時は返さない。
       devCode: sent.mock ? code : undefined,
     });
@@ -66,4 +74,12 @@ export async function POST(request: NextRequest) {
     console.error("登録エラー:", err);
     return NextResponse.json({ error: "サーバーエラーが発生しました。" }, { status: 500 });
   }
+}
+
+// SMTP実送信に失敗したときの共通レスポンス（コードを発行済みでもメールが届かないため明示エラーにする）
+function mailFailed() {
+  return NextResponse.json(
+    { error: "確認コードのメール送信に失敗しました。管理者のSMTP設定（ホスト・ポート・ユーザー・パスワード）をご確認ください。" },
+    { status: 502 },
+  );
 }
