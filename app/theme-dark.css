@@ -96,6 +96,9 @@ html[data-theme="dark"] { background: var(--bg); }
 [data-theme="dark"] .template-card,
 [data-theme="dark"] .manual-item,
 [data-theme="dark"] .sheet-card { background: linear-gradient(145deg, #161e31, #131a2a); border-color: var(--border); }
+[data-theme="dark"] .manual-item.row-selected { background: var(--primary-bg); border-color: var(--primary); }
+[data-theme="dark"] .manual-item-del { color: var(--text-faint); }
+[data-theme="dark"] .manual-item-del:hover { background: var(--danger-bg); color: #fb7185; }
 
 /* 内側の薄いサーフェス（surface-2 相当） */
 [data-theme="dark"] .today-progress,
