@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireSession, unauthorized } from "@/lib/api-helpers";
+import { getNumberSetting } from "@/lib/settings";
 
 export async function GET(request: NextRequest) {
   const session = await requireSession(request);
@@ -51,7 +52,7 @@ export async function GET(request: NextRequest) {
     manualCount,
     excludedCount,
     todaySentCount,
-    maxSendsPerDay: parseInt(process.env.MAX_SENDS_PER_DAY ?? "50"),
+    maxSendsPerDay: await getNumberSetting("MAX_SENDS_PER_DAY", 50),
     recentLogs,
   });
 }

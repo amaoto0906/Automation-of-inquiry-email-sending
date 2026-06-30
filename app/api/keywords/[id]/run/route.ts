@@ -23,7 +23,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
   let provider;
   try {
-    provider = getSearchProvider();
+    provider = await getSearchProvider();
   } catch (err) {
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }

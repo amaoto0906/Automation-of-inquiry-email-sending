@@ -1,6 +1,7 @@
 import { chromium } from "playwright";
 import path from "path";
 import { sleep } from "@/lib/utils";
+import { getNumberSetting } from "@/lib/settings";
 
 interface ContactPageData {
   contactUrl: string;
@@ -62,7 +63,7 @@ export async function submitForm(
 
     await page.goto(contactPage.contactUrl, { waitUntil: "networkidle", timeout: 20000 });
 
-    const delay = parseInt(process.env.DEFAULT_SEND_DELAY_SECONDS ?? "5") * 1000;
+    const delay = (await getNumberSetting("DEFAULT_SEND_DELAY_SECONDS", 5)) * 1000;
     await sleep(delay);
 
     for (const field of contactPage.formFields) {

@@ -4,7 +4,11 @@
  * 未設定の場合は「モックモード」：サーバーログに出力し、devCode を返す（デモ・開発用）。
  */
 
-const SENDER = process.env.MAIL_FROM || "Outreach Hub <no-reply@outreach-hub.jp>";
+import { getSettingOr } from "@/lib/settings";
+
+async function getSender(): Promise<string> {
+  return getSettingOr("MAIL_FROM", "Outreach Hub <no-reply@outreach-hub.jp>");
+}
 
 export function isEmailConfigured(): boolean {
   return Boolean(process.env.SMTP_HOST && process.env.SMTP_USER);
@@ -35,7 +39,7 @@ async function sendMail(to: string, subject: string, text: string, html: string)
       secure: process.env.SMTP_SECURE === "true",
       auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
     });
-    await transport.sendMail({ from: SENDER, to, subject, text, html });
+    await transport.sendMail({ from: await getSender(), to, subject, text, html });
     return { ok: true, mock: false };
   } catch (err) {
     console.error("メール送信エラー:", err);

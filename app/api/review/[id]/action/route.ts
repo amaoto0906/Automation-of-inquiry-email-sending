@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireSession, unauthorized, logActivity } from "@/lib/api-helpers";
 import { submitForm } from "@/lib/crawler/submitter";
 import { syncToSheets } from "@/lib/sheets";
+import { getNumberSetting, getBoolSetting } from "@/lib/settings";
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await requireSession(request);
@@ -35,7 +36,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const todayCount = await prisma.sendLog.count({
       where: { userId: session.id, sentAt: { gte: today }, status: { in: ["success", "dry_run"] } },
     });
-    const maxPerDay = parseInt(process.env.MAX_SENDS_PER_DAY ?? "50");
+    const maxPerDay = await getNumberSetting("MAX_SENDS_PER_DAY", 50);
     if (todayCount >= maxPerDay) {
       return NextResponse.json({ error: `本日の送信上限（${maxPerDay}件）に達しました` }, { status: 429 });
     }
@@ -69,7 +70,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     if (!template) return NextResponse.json({ error: "送信テンプレートが見つかりません" }, { status: 404 });
 
-    const isDryRun = process.env.ALLOW_LIVE_SEND !== "true";
+    const isDryRun = !(await getBoolSetting("ALLOW_LIVE_SEND", false));
 
     let status: string;
     let errorMessage: string | null = null;
@@ -77,7 +78,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     if (isDryRun) {
       status = "dry_run";
-      const delay = parseInt(process.env.DEFAULT_SEND_DELAY_SECONDS ?? "5") * 1000;
+      const delay = (await getNumberSetting("DEFAULT_SEND_DELAY_SECONDS", 5)) * 1000;
       await new Promise(r => setTimeout(r, Math.min(delay, 2000)));
     } else {
       const result = await submitForm(contactPage, template);

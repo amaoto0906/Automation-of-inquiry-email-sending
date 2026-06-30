@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireSession, unauthorized } from "@/lib/api-helpers";
+import { getBoolSetting } from "@/lib/settings";
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await requireSession(request);
@@ -47,6 +48,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     excludeRules: matchedRules,
     hasPreviousSend,
     canAutoSend: !contactPage.hasCaptcha && !contactPage.hasNoSolicitationText && matchedRules.length === 0 && contactPage.hasForm,
-    isDryRun: process.env.ALLOW_LIVE_SEND !== "true",
+    isDryRun: !(await getBoolSetting("ALLOW_LIVE_SEND", false)),
   });
 }

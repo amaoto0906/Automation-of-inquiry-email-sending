@@ -2,11 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AlertTriangle, Bell, CheckCircle2, Clock3, Database, Download, LockKeyhole, Save, Send, ShieldCheck } from "lucide-react";
+import { AlertTriangle, Bell, CheckCircle2, Clock3, Database, Download, KeyRound, LockKeyhole, Mail, PlugZap, Save, Search, Send, Sheet, ShieldCheck, X } from "lucide-react";
 import { ActionButton } from "@/components/action-button";
 import { PageTitle } from "@/components/ui";
 
 const TABS = [
+  { id: "integration", label: "API・連携", icon: PlugZap },
   { id: "safety", label: "安全運用", icon: ShieldCheck },
   { id: "delivery", label: "送信制御", icon: Send },
   { id: "notification", label: "通知", icon: Bell },
@@ -16,29 +17,64 @@ const TABS = [
 
 export function SettingsView() {
   const router = useRouter();
-  const [tab, setTab] = useState<(typeof TABS)[number]["id"]>("safety");
+  const [tab, setTab] = useState<(typeof TABS)[number]["id"]>("integration");
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ msg: string; error?: boolean } | null>(null);
   const [pendingHref, setPendingHref] = useState<string | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // API・連携設定（DBに保存される実設定）
+  const [cfg, setCfg] = useState<Record<string, string>>({});
+  const [secretSet, setSecretSet] = useState<Record<string, boolean>>({});
+  const [loaded, setLoaded] = useState(false);
+
   const markDirty = useCallback(() => setDirty(true), []);
 
-  const showToast = useCallback((msg: string) => {
-    setToast(msg);
+  const showToast = useCallback((msg: string, error = false) => {
+    setToast({ msg, error });
     if (toastTimer.current) clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(null), 3200);
+    toastTimer.current = setTimeout(() => setToast(null), 3600);
+  }, []);
+
+  // 現在の設定値を読み込む（シークレットは設定済み有無のみ）
+  useEffect(() => {
+    fetch("/api/settings")
+      .then(async (r) => {
+        if (!r.ok) return;
+        const d = await r.json();
+        setCfg({ ...(d.values ?? {}), SERPAPI_API_KEY: "", GOOGLE_PRIVATE_KEY: "" });
+        setSecretSet(d.secrets ?? {});
+      })
+      .finally(() => setLoaded(true));
+  }, []);
+
+  const setField = useCallback((key: string, value: string) => {
+    setCfg((prev) => ({ ...prev, [key]: value }));
+    setDirty(true);
   }, []);
 
   const save = useCallback(async () => {
     setSaving(true);
-    // 設定の保存（デモ環境のため疑似的に処理）
-    await new Promise((r) => setTimeout(r, 600));
-    setSaving(false);
-    setDirty(false);
-    showToast("設定を保存しました");
-  }, [showToast]);
+    try {
+      const res = await fetch("/api/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ values: cfg }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error ?? "保存に失敗しました");
+      // 再取得した値で更新し、シークレット入力欄はクリア
+      setCfg({ ...(d.values ?? {}), SERPAPI_API_KEY: "", GOOGLE_PRIVATE_KEY: "" });
+      setSecretSet(d.secrets ?? {});
+      setDirty(false);
+      showToast("設定を保存しました");
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "保存に失敗しました", true);
+    } finally {
+      setSaving(false);
+    }
+  }, [cfg, showToast]);
 
   // 未保存の変更がある状態での離脱をガード
   useEffect(() => {
@@ -111,6 +147,9 @@ export function SettingsView() {
         </nav>
 
         <div className="settings-content" onChange={markDirty} onInput={markDirty}>
+          <div hidden={tab !== "integration"}>
+            {loaded ? <IntegrationSection cfg={cfg} setField={setField} secretSet={secretSet} /> : <article className="panel setting-section"><p className="empty-state">設定を読み込み中…</p></article>}
+          </div>
           <div hidden={tab !== "safety"}><SafetySection /></div>
           <div hidden={tab !== "delivery"}><DeliverySection /></div>
           <div hidden={tab !== "notification"}><NotificationSection /></div>
@@ -119,11 +158,11 @@ export function SettingsView() {
         </div>
       </section>
 
-      {/* 保存成功トースト */}
+      {/* 保存トースト */}
       {toast && (
-        <div className="toast success" role="status">
-          <span className="toast-icon"><CheckCircle2 size={20} /></span>
-          <div><strong>{toast}</strong></div>
+        <div className={`toast ${toast.error ? "danger" : "success"}`} role="status">
+          <span className="toast-icon">{toast.error ? <X size={20} /> : <CheckCircle2 size={20} />}</span>
+          <div><strong>{toast.msg}</strong></div>
         </div>
       )}
 
@@ -147,6 +186,66 @@ export function SettingsView() {
         </div>
       )}
     </>
+  );
+}
+
+function IntegrationSection({ cfg, setField, secretSet }: { cfg: Record<string, string>; setField: (k: string, v: string) => void; secretSet: Record<string, boolean> }) {
+  return (
+    <div className="settings-stack">
+      <article className="panel setting-section">
+        <div className="setting-heading"><span><Search size={22} /></span><div><h2>検索（キーワード収集）</h2><p>Google検索結果の取得に使用するプロバイダとAPIキーを設定します。</p></div></div>
+        <div className="field">
+          <label htmlFor="s-provider">検索プロバイダ</label>
+          <select id="s-provider" value={cfg.SEARCH_PROVIDER ?? "mock"} onChange={(e) => setField("SEARCH_PROVIDER", e.target.value)}>
+            <option value="mock">モック（開発・動作確認用）</option>
+            <option value="serpapi">SerpAPI（本番）</option>
+          </select>
+          <small>本番ではSerpAPIを選択し、下のAPIキーを設定してください。</small>
+        </div>
+        <SecretField id="s-serp" label="SerpAPI APIキー" placeholder="例: 0123abcd4567ef..." value={cfg.SERPAPI_API_KEY ?? ""} configured={!!secretSet.SERPAPI_API_KEY} onChange={(v) => setField("SERPAPI_API_KEY", v)} help="serpapi.com で発行したAPIキー。" />
+      </article>
+
+      <article className="panel setting-section">
+        <div className="setting-heading"><span><Sheet size={22} /></span><div><h2>Googleスプレッドシート連携</h2><p>送信結果の記録先と、連携用サービスアカウントを設定します。</p></div></div>
+        <div className="field"><label htmlFor="g-sid">スプレッドシートID</label><input id="g-sid" value={cfg.GOOGLE_SHEETS_SPREADSHEET_ID ?? ""} onChange={(e) => setField("GOOGLE_SHEETS_SPREADSHEET_ID", e.target.value)} placeholder="1AbC...xyz" /><small>シートURLの /d/ と /edit の間の文字列です。</small></div>
+        <div className="field"><label htmlFor="g-email">サービスアカウントのメール</label><input id="g-email" value={cfg.GOOGLE_SERVICE_ACCOUNT_EMAIL ?? ""} onChange={(e) => setField("GOOGLE_SERVICE_ACCOUNT_EMAIL", e.target.value)} placeholder="xxxx@xxxx.iam.gserviceaccount.com" /><small>このアドレスに対象シートの「編集者」権限を付与してください。</small></div>
+        <SecretField id="g-key" label="サービスアカウント秘密鍵" textarea placeholder={"-----BEGIN PRIVATE KEY-----\n..."} value={cfg.GOOGLE_PRIVATE_KEY ?? ""} configured={!!secretSet.GOOGLE_PRIVATE_KEY} onChange={(v) => setField("GOOGLE_PRIVATE_KEY", v)} help="Google CloudのJSONキー内 private_key の値。" />
+      </article>
+
+      <article className="panel setting-section">
+        <div className="setting-heading"><span><Send size={22} /></span><div><h2>本番送信制御</h2><p>本番送信の可否と送信レートを制御します。</p></div></div>
+        <label className="setting-toggle">
+          <div>
+            <strong>本番送信を有効化{(cfg.ALLOW_LIVE_SEND ?? "false") !== "true" && <span className="dryrun-chip">現在 dry-run</span>}</strong>
+            <p>オフの間は実送信せず、dry-run（テスト送信・ログのみ）として動作します。本番運用の準備が整ってからオンにしてください。</p>
+          </div>
+          <input type="checkbox" checked={(cfg.ALLOW_LIVE_SEND ?? "false") === "true"} onChange={(e) => setField("ALLOW_LIVE_SEND", e.target.checked ? "true" : "false")} />
+          <span className="switch" />
+        </label>
+        <div className="form-row">
+          <div className="field"><label htmlFor="m-max">1日の送信上限</label><div className="input-suffix"><input id="m-max" type="number" min={1} value={cfg.MAX_SENDS_PER_DAY ?? "50"} onChange={(e) => setField("MAX_SENDS_PER_DAY", e.target.value)} /><span>件</span></div><small>ユーザーごと・1日あたり</small></div>
+          <div className="field"><label htmlFor="m-delay">送信間隔</label><div className="input-suffix"><input id="m-delay" type="number" min={0} value={cfg.DEFAULT_SEND_DELAY_SECONDS ?? "5"} onChange={(e) => setField("DEFAULT_SEND_DELAY_SECONDS", e.target.value)} /><span>秒</span></div><small>連続送信時の待機時間</small></div>
+        </div>
+      </article>
+
+      <article className="panel setting-section">
+        <div className="setting-heading"><span><Mail size={22} /></span><div><h2>通知メール</h2><p>承認通知などシステムメールの差出人表示です。</p></div></div>
+        <div className="field"><label htmlFor="mail-from">差出人</label><input id="mail-from" value={cfg.MAIL_FROM ?? ""} onChange={(e) => setField("MAIL_FROM", e.target.value)} placeholder="Outreach Hub <no-reply@example.jp>" /></div>
+      </article>
+    </div>
+  );
+}
+
+function SecretField({ id, label, value, configured, onChange, placeholder, help, textarea = false }: { id: string; label: string; value: string; configured: boolean; onChange: (v: string) => void; placeholder?: string; help?: string; textarea?: boolean }) {
+  const ph = configured ? "（設定済み。変更する場合のみ入力）" : placeholder;
+  return (
+    <div className="field">
+      <label htmlFor={id}><KeyRound size={13} />{label}{configured ? <span className="secret-chip set">設定済み</span> : <span className="secret-chip unset">未設定</span>}</label>
+      {textarea
+        ? <textarea id={id} rows={4} value={value} onChange={(e) => onChange(e.target.value)} placeholder={ph} />
+        : <input id={id} type="password" autoComplete="new-password" value={value} onChange={(e) => onChange(e.target.value)} placeholder={ph} />}
+      <small>{help}{configured ? " 空のまま保存すると現在の値を保持します。" : ""}</small>
+    </div>
   );
 }
 

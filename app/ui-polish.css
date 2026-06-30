@@ -638,6 +638,14 @@ tbody tr:hover td { background: #f8fbff; }
 .toast-icon { display: flex; align-items: center; justify-content: center; color: #059669; }
 @keyframes toastIn { from { opacity: 0; transform: translateY(14px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
 .setting-section { scroll-margin-top: 96px; }
+/* API・連携タブ：複数パネルを縦に並べる */
+.settings-stack { display: flex; flex-direction: column; gap: 18px; }
+.setting-section .field label { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.setting-section textarea { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; line-height: 1.6; resize: vertical; }
+.secret-chip { font-size: 9px; font-weight: 700; padding: 1px 7px; border-radius: 6px; }
+.secret-chip.set { color: #047857; background: #e7f6ef; }
+.secret-chip.unset { color: #97a2bb; background: #eef1f7; }
+.dryrun-chip { font-size: 9px; font-weight: 700; color: #b45309; background: #fef3da; padding: 1px 7px; border-radius: 6px; margin-left: 6px; }
 .setting-heading { display: flex; align-items: center; gap: 12px; padding-bottom: 17px; border-bottom: 1px solid #e8edf4; }
 .setting-heading > span { display: flex; width: 44px; height: 44px; align-items: center; justify-content: center; color: #2563eb; border-radius: 10px; background: #edf4ff; }
 .setting-heading h2 { font-size: 16px; }

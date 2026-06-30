@@ -1,9 +1,10 @@
 import { google } from "googleapis";
 import { prisma } from "@/lib/prisma";
+import { getSetting } from "@/lib/settings";
 
-function getAuth() {
-  const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-  const key = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n");
+async function getAuth() {
+  const email = await getSetting("GOOGLE_SERVICE_ACCOUNT_EMAIL");
+  const key = (await getSetting("GOOGLE_PRIVATE_KEY"))?.replace(/\\n/g, "\n");
 
   if (!email || !key) return null;
 
@@ -15,8 +16,8 @@ function getAuth() {
 }
 
 export async function syncToSheets(sendLogId: string): Promise<void> {
-  const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
-  const auth = getAuth();
+  const spreadsheetId = await getSetting("GOOGLE_SHEETS_SPREADSHEET_ID");
+  const auth = await getAuth();
 
   if (!spreadsheetId || !auth) {
     await prisma.sheetSyncLog.create({
