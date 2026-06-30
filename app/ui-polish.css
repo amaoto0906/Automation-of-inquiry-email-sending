@@ -339,6 +339,8 @@ th, td { height: 54px; padding: 13px 17px; border-color: #e8edf4; }
 th { color: #667793; background: #f7f9fc; font-size: 10.5px; letter-spacing: .09em; }
 tbody tr { transition: background .15s ease, box-shadow .15s ease; }
 tbody tr:hover td { background: #f8fbff; }
+tbody tr.row-selected td { background: #eef4ff; }
+tbody tr.row-selected:hover td { background: #e7efff; }
 .primary-link { color: #1f5fc5; }
 .row-action { border-radius: 8px; }
 .pagination button { width: auto; min-width: 34px; border-radius: 9px; background: #fff; }

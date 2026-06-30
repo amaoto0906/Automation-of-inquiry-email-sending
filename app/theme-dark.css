@@ -175,6 +175,8 @@ html[data-theme="dark"] { background: var(--bg); }
 [data-theme="dark"] th { background: var(--surface-2); color: var(--text-muted); }
 [data-theme="dark"] td { border-color: var(--border); color: var(--text); }
 [data-theme="dark"] tbody tr:hover td { background: var(--surface-2); }
+[data-theme="dark"] tbody tr.row-selected td { background: var(--primary-bg); }
+[data-theme="dark"] tbody tr.row-selected:hover td { background: #1b2c4d; }
 [data-theme="dark"] .muted-cell, [data-theme="dark"] .last-seen { color: var(--text-muted); }
 
 /* ===== 入力・ボタン ===== */
