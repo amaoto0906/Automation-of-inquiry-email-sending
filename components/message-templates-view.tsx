@@ -52,7 +52,7 @@ function preview(body: string) {
 
 export function MessageTemplatesView() {
   // ページ遷移・リロードを跨いで作成・編集・削除を保持
-  const [templates, setTemplates] = usePersistentState<Template[]>("message-templates", INITIAL);
+  const [templates, setTemplates, hydrated] = usePersistentState<Template[]>("message-templates", INITIAL);
   const [selectedId, setSelectedId] = useState<string>("t1");
   const [form, setForm] = useState<{ title: string; subject: string; body: string } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Template | null>(null);
@@ -153,8 +153,9 @@ export function MessageTemplatesView() {
       <section className="template-layout" onClick={() => setOpenMenu(null)}>
         {/* ── 左: テンプレート一覧 ── */}
         <div className="template-list">
-          {templates.length === 0 && <p className="empty-state">テンプレートがありません。新規作成してください。</p>}
-          {templates.map((t) => (
+          {!hydrated && <p className="empty-state">読み込み中…</p>}
+          {hydrated && templates.length === 0 && <p className="empty-state">テンプレートがありません。新規作成してください。</p>}
+          {hydrated && templates.map((t) => (
             <article
               key={t.id}
               className={`panel template-card${t.id === selectedId ? " selected" : ""}`}
@@ -193,7 +194,9 @@ export function MessageTemplatesView() {
 
         {/* ── 右: ライブプレビュー / エディタ ── */}
         <aside className="panel editor-card" onClick={(e) => e.stopPropagation()}>
-          {!selected ? (
+          {!hydrated ? (
+            <p className="empty-state">読み込み中…</p>
+          ) : !selected ? (
             <p className="empty-state">テンプレートを選択してください。</p>
           ) : form ? (
             /* 編集モード */

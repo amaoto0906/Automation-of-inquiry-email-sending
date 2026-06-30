@@ -47,12 +47,6 @@ export const contactPages: Array<{
   { company: "株式会社アーバンリンク", page: "/support/form", fields: 9, checked: "11:28", status: "failed" },
 ];
 
-export const manualChecks = [
-  { company: "東都デザイン合同会社", reason: "CAPTCHAが検出されました", owner: "山田 太郎", date: "13:18", priority: "高" },
-  { company: "北斗ソリューションズ", reason: "入力項目を特定できません", owner: "未割当", date: "10:42", priority: "中" },
-  { company: "株式会社ライトパス", reason: "過去の送信履歴があります", owner: "佐藤 美咲", date: "昨日 16:08", priority: "高" },
-];
-
 export const users = [
   { name: "佐藤 美咲", email: "misaki.sato@example.jp", role: "管理者", status: "利用中", lastSeen: "2分前", initials: "佐" },
   { name: "山田 太郎", email: "taro.yamada@example.jp", role: "メンバー", status: "利用中", lastSeen: "18分前", initials: "山" },

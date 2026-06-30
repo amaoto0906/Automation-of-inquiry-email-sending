@@ -30,6 +30,10 @@ import { useEffect, useRef, useState } from "react";
 import { UserAvatar } from "./ui";
 import { ThemeToggle } from "./theme-toggle";
 import { Logo } from "./logo";
+import { usePersistentSelector } from "@/lib/hooks/use-persistent-state";
+
+/** 手動確認の既定件数。サンプルデータを持たないため 0（localStorage 未保存時の初期値）。 */
+const MANUAL_CHECKS_SEED_COUNT = 0;
 
 interface NavItem {
   href: string;
@@ -57,7 +61,7 @@ const navGroups: NavGroup[] = [
     label: "送信管理",
     items: [
       { href: "/send-logs", label: "送信履歴", icon: Activity },
-      { href: "/manual-checks", label: "手動確認", icon: ShieldCheck, badge: "3" },
+      { href: "/manual-checks", label: "手動確認", icon: ShieldCheck },
       { href: "/exclude-rules", label: "除外ルール", icon: Ban },
       { href: "/message-templates", label: "文面テンプレート", icon: MessageSquareText },
     ],
@@ -111,6 +115,18 @@ export function AppShell({ children, user }: AppShellProps) {
   const [notifItems, setNotifItems] = useState<NotifItem[]>([]);
   const [notifOpen, setNotifOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
+
+  // 手動確認の未対応件数を localStorage から購読（削除すると即座にバッジへ反映）
+  const manualPending = usePersistentSelector<Array<{ done?: boolean }>, number>(
+    "manual-checks-v2",
+    (parsed) => (parsed == null ? MANUAL_CHECKS_SEED_COUNT : parsed.filter((c) => !c.done).length),
+    MANUAL_CHECKS_SEED_COUNT,
+  );
+
+  // 旧バージョンの永続化フックが書き込んだ初期シード3件を一度だけ掃除する
+  useEffect(() => {
+    try { window.localStorage.removeItem("manual-checks"); } catch { /* noop */ }
+  }, []);
 
   useEffect(() => { setMobileOpen(false); setNotifOpen(false); }, [pathname]);
 
@@ -177,8 +193,13 @@ export function AppShell({ children, user }: AppShellProps) {
             {group.items.map((item) => {
               const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
               const Icon = item.icon;
-              // ユーザー管理には承認待ち件数を動的バッジで表示
-              const badge = item.href === "/users" ? (notifCount > 0 ? String(notifCount) : undefined) : item.badge;
+              // 動的バッジ: ユーザー管理＝承認待ち件数 / 手動確認＝未対応件数
+              const badge =
+                item.href === "/users"
+                  ? notifCount > 0 ? String(notifCount) : undefined
+                  : item.href === "/manual-checks"
+                  ? manualPending > 0 ? String(manualPending) : undefined
+                  : item.badge;
               return (
                 <Link key={item.href} href={item.href} className={`nav-item ${active ? "active" : ""}`} title={collapsed ? item.label : undefined}>
                   <Icon size={19} aria-hidden="true" />

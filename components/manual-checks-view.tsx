@@ -4,7 +4,6 @@ import { useMemo, useRef, useState } from "react";
 import { AlertTriangle, CheckCircle2, Search, ShieldCheck, Trash2, X } from "lucide-react";
 import { ActionButton } from "@/components/action-button";
 import { PageTitle, UserAvatar } from "@/components/ui";
-import { manualChecks } from "@/lib/mock-data";
 import { usePersistentState } from "@/lib/hooks/use-persistent-state";
 
 interface CheckItem {
@@ -17,11 +16,13 @@ interface CheckItem {
   done: boolean;
 }
 
-const INITIAL: CheckItem[] = manualChecks.map((c, i) => ({ ...c, id: `mc-${i}`, done: false }));
+// サンプルデータは持たない。手動確認は実データ（将来のバックエンド連携）で表示する。
+const INITIAL: CheckItem[] = [];
 
 export function ManualChecksView() {
   // ページ遷移・リロードを跨いで削除状態を保持
-  const [items, setItems] = usePersistentState<CheckItem[]>("manual-checks", INITIAL);
+  // 旧キー "manual-checks" には初期シード3件が残っているため、キーを更新して無効化する
+  const [items, setItems, hydrated] = usePersistentState<CheckItem[]>("manual-checks-v2", INITIAL);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [query, setQuery] = useState("");
   const [tab, setTab] = useState<"pending" | "done">("pending");
@@ -98,7 +99,7 @@ export function ManualChecksView() {
     <>
       <PageTitle eyebrow="HUMAN REVIEW" title="手動確認" description="自動処理できなかった対象を、人の判断で安全に確認します。" />
 
-      {pendingCount > 0 && (
+      {hydrated && pendingCount > 0 && (
         <div className="review-alert warning">
           <AlertTriangle size={23} />
           <div><strong>{pendingCount} 件の確認が必要です</strong><p>CAPTCHAや重複履歴がある対象は、自動送信されません。内容を確認して対応を選択してください。</p></div>
@@ -109,26 +110,28 @@ export function ManualChecksView() {
         <div className="table-toolbar">
           <div className="search-input"><Search size={17} /><input placeholder="企業名・理由を検索" aria-label="手動確認を検索" value={query} onChange={(e) => setQuery(e.target.value)} /></div>
           <div className="filter-chips compact">
-            <button type="button" className={tab === "pending" ? "active" : ""} onClick={() => setTab("pending")}>未対応 {pendingCount}</button>
-            <button type="button" className={tab === "done" ? "active" : ""} onClick={() => setTab("done")}>対応済み {doneCount}</button>
+            <button type="button" className={tab === "pending" ? "active" : ""} onClick={() => setTab("pending")}>未対応 {hydrated ? pendingCount : ""}</button>
+            <button type="button" className={tab === "done" ? "active" : ""} onClick={() => setTab("done")}>対応済み {hydrated ? doneCount : ""}</button>
           </div>
         </div>
 
         <div className="bulk-bar">
           <label className="bulk-select-all">
-            <input type="checkbox" checked={allSelected} onChange={toggleAll} disabled={filtered.length === 0} aria-label="すべて選択" />
-            <span className="bulk-info">{selected.size > 0 ? `${selected.size} 件を選択中` : `${filtered.length} 件`}</span>
+            <input type="checkbox" checked={allSelected} onChange={toggleAll} disabled={!hydrated || filtered.length === 0} aria-label="すべて選択" />
+            <span className="bulk-info">{!hydrated ? "読み込み中…" : selected.size > 0 ? `${selected.size} 件を選択中` : `${filtered.length} 件`}</span>
           </label>
           <div className="bulk-actions">
             {selected.size > 0 && (
               <ActionButton variant="danger" icon={<Trash2 size={15} />} onClick={() => setConfirm("selected")}>選択削除（{selected.size}）</ActionButton>
             )}
-            <ActionButton variant="secondary" icon={<Trash2 size={15} />} disabled={items.length === 0} onClick={() => setConfirm("all")}>すべて削除</ActionButton>
+            <ActionButton variant="secondary" icon={<Trash2 size={15} />} disabled={!hydrated || items.length === 0} onClick={() => setConfirm("all")}>すべて削除</ActionButton>
           </div>
         </div>
 
         <div className="manual-list">
-          {filtered.length === 0 ? (
+          {!hydrated ? (
+            <p className="empty-state">読み込み中…</p>
+          ) : filtered.length === 0 ? (
             <p className="empty-state">{items.length === 0 ? "手動確認リストはありません。" : "条件に一致する項目がありません。"}</p>
           ) : filtered.map((item, index) => (
             <div className={`manual-item${selected.has(item.id) ? " row-selected" : ""}`} key={item.id}>

@@ -624,8 +624,10 @@ tbody tr.row-selected:hover td { background: #e7efff; }
 .rule-grid { gap: 16px; }
 .rule-card { border-color: #e0e7f0; border-radius: 12px; background: linear-gradient(145deg,#fff,#f8fafc); transition: transform .18s ease, box-shadow .18s ease; }
 .rule-card:hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(35,65,105,.08); }
-.rule-card-top button { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 7px; transition: background .14s; }
+.rule-card-top button { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 7px; transition: background .14s, color .14s; }
 .rule-card-top button:hover { background: var(--primary-bg); }
+.rule-card-top .rule-card-del { color: var(--danger); }
+.rule-card-top .rule-card-del:hover { background: var(--danger-bg); }
 .rule-card footer { align-items: center; }
 .rule-state { display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px; border-radius: 999px; font-weight: 600; font-size: 11px; }
 .rule-state::before { content: ""; width: 6px; height: 6px; border-radius: 50%; }

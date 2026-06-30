@@ -53,6 +53,10 @@ export function ExcludeRulesView() {
   const [error, setError] = useState("");
   const [deleting, setDeleting] = useState(false);
 
+  // カード単位の削除確認（モーダル編集を経由せず、各カードから直接削除する）
+  const [confirmDelete, setConfirmDelete] = useState<Rule | null>(null);
+  const [cardDeleting, setCardDeleting] = useState(false);
+
   const [toast, setToast] = useState<string | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   function showToast(msg: string) {
@@ -133,19 +137,41 @@ export function ExcludeRulesView() {
     }
   }
 
+  // 実際の削除処理（API呼び出し＋状態更新）。成否を返す。
+  async function deleteRuleById(id: string): Promise<boolean> {
+    const res = await fetch(`/api/exclude-rules/${id}`, { method: "DELETE" });
+    if (!res.ok) return false;
+    setRules((prev) => prev.filter((r) => r.id !== id));
+    return true;
+  }
+
+  // 編集モーダル内からの削除
   async function remove() {
     if (editing === "new" || !editing) return;
     setDeleting(true);
     try {
-      const res = await fetch(`/api/exclude-rules/${editing.id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error();
-      setRules((prev) => prev.filter((r) => r.id !== editing.id));
+      if (!(await deleteRuleById(editing.id))) throw new Error();
       showToast("除外ルールを削除しました");
       closeModal();
     } catch {
       setError("削除に失敗しました");
     } finally {
       setDeleting(false);
+    }
+  }
+
+  // カードの削除ボタン → 確認ダイアログからの削除
+  async function confirmRemoveCard() {
+    if (!confirmDelete) return;
+    setCardDeleting(true);
+    const name = confirmDelete.value;
+    const ok = await deleteRuleById(confirmDelete.id);
+    setCardDeleting(false);
+    if (ok) {
+      setConfirmDelete(null);
+      showToast(`「${name}」を削除しました`);
+    } else {
+      showToast("削除に失敗しました");
     }
   }
 
@@ -195,6 +221,7 @@ export function ExcludeRulesView() {
                     <span><Icon size={19} /></span>
                     <small>{meta.label}</small>
                     <button type="button" onClick={() => openEdit(rule)} aria-label={`${rule.value}を編集`}><Pencil size={13} />編集</button>
+                    <button type="button" className="rule-card-del" onClick={() => setConfirmDelete(rule)} aria-label={`${rule.value}を削除`}><Trash2 size={13} />削除</button>
                   </div>
                   <h3>{rule.value}</h3>
                   <p>{rule.memo ?? "—"}</p>
@@ -241,6 +268,28 @@ export function ExcludeRulesView() {
                 <ActionButton type="submit" loading={saving} icon={<Plus size={15} />}>{isNew ? "追加" : "保存"}</ActionButton>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* カード削除の確認ダイアログ */}
+      {confirmDelete && (
+        <div className="modal-backdrop" onMouseDown={(e) => { if (e.target === e.currentTarget && !cardDeleting) setConfirmDelete(null); }}>
+          <div className="modal-box panel">
+            <div className="modal-header">
+              <h2>除外ルールを削除</h2>
+              <button type="button" onClick={() => setConfirmDelete(null)} className="icon-btn" aria-label="閉じる" disabled={cardDeleting}><X size={18} /></button>
+            </div>
+            <div className="modal-form">
+              <div className="delete-confirm">
+                <span className="delete-confirm-icon"><Trash2 size={22} /></span>
+                <p>「<strong>{confirmDelete.value}</strong>」を削除します。この操作は取り消せません。</p>
+              </div>
+              <div className="modal-actions">
+                <ActionButton type="button" variant="danger" icon={<Trash2 size={15} />} loading={cardDeleting} onClick={confirmRemoveCard}>削除する</ActionButton>
+                <ActionButton type="button" variant="ghost" onClick={() => setConfirmDelete(null)} disabled={cardDeleting}>キャンセル</ActionButton>
+              </div>
+            </div>
           </div>
         </div>
       )}

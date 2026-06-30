@@ -40,7 +40,7 @@ function buildCsv(rows: LogRow[]): string {
 
 export function SendLogsView() {
   // ページ遷移・リロードを跨いで削除状態を保持
-  const [logs, setLogs] = usePersistentState<LogRow[]>("send-logs", INITIAL);
+  const [logs, setLogs, hydrated] = usePersistentState<LogRow[]>("send-logs", INITIAL);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("all");
@@ -136,20 +136,22 @@ export function SendLogsView() {
         </div>
 
         <div className="bulk-bar">
-          <span className="bulk-info">{selected.size > 0 ? `${selected.size} 件を選択中` : `全 ${filtered.length} 件`}</span>
+          <span className="bulk-info">{!hydrated ? "読み込み中…" : selected.size > 0 ? `${selected.size} 件を選択中` : `全 ${filtered.length} 件`}</span>
           <div className="bulk-actions">
             {selected.size > 0 && (
               <ActionButton variant="danger" icon={<Trash2 size={15} />} onClick={() => setConfirm("selected")}>選択削除（{selected.size}）</ActionButton>
             )}
-            <ActionButton variant="secondary" icon={<Trash2 size={15} />} disabled={logs.length === 0} onClick={() => setConfirm("all")}>すべて削除</ActionButton>
+            <ActionButton variant="secondary" icon={<Trash2 size={15} />} disabled={!hydrated || logs.length === 0} onClick={() => setConfirm("all")}>すべて削除</ActionButton>
           </div>
         </div>
 
         <div className="table-wrap">
           <table>
-            <thead><tr><th><input type="checkbox" aria-label="すべて選択" checked={allSelected} onChange={toggleAll} disabled={filtered.length === 0} /></th><th>送信先</th><th>担当者</th><th>送信日時</th><th>送信状態</th><th>シート同期</th><th>操作</th></tr></thead>
+            <thead><tr><th><input type="checkbox" aria-label="すべて選択" checked={allSelected} onChange={toggleAll} disabled={!hydrated || filtered.length === 0} /></th><th>送信先</th><th>担当者</th><th>送信日時</th><th>送信状態</th><th>シート同期</th><th>操作</th></tr></thead>
             <tbody>
-              {filtered.length === 0 ? (
+              {!hydrated ? (
+                <tr><td colSpan={7}><p className="empty-state">読み込み中…</p></td></tr>
+              ) : filtered.length === 0 ? (
                 <tr><td colSpan={7}><p className="empty-state">{logs.length === 0 ? "送信履歴はありません。" : "条件に一致する送信履歴がありません。"}</p></td></tr>
               ) : filtered.map((log) => (
                 <tr key={log.id} className={selected.has(log.id) ? "row-selected" : ""}>
