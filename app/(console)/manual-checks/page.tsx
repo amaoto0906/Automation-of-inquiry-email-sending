@@ -18,7 +18,7 @@ export default function ManualChecksPage() {
               <span className={`priority priority-${item.priority === "高" ? "high" : "medium"}`}>{item.priority}</span>
               <div className="manual-copy"><h3>{item.company}</h3><p><ShieldCheck size={15} />{item.reason}</p><small>検出：{item.date}</small></div>
               <div className="assigned"><span>担当者</span><div>{item.owner !== "未割当" && <UserAvatar initials={item.owner.slice(0, 1)} size="sm" />}{item.owner}</div></div>
-              <ActionButton href={`/review/${index === 0 ? "captcha-001" : `manual-${index + 1}`}`} variant={index === 0 ? "primary" : "secondary"}>内容を確認</ActionButton>
+              <ActionButton href={`/review/${index === 0 ? "captcha-001" : `manual-${index + 1}`}`} variant="primary">内容を確認</ActionButton>
             </div>
           ))}
         </div>
