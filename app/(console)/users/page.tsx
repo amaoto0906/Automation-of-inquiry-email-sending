@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Building2, Check, Clock, Plus, RotateCcw, ShieldCheck, Trash2, UserCheck, UsersRound, X, Eye, EyeOff } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Building2, Check, CheckCircle2, Clock, Plus, RotateCcw, ShieldCheck, Trash2, UserCheck, UsersRound, X, Eye, EyeOff } from "lucide-react";
 import { ActionButton } from "@/components/action-button";
 import { PageTitle, UserAvatar } from "@/components/ui";
 
@@ -41,6 +41,14 @@ export default function UsersPage() {
   const [deleteFor, setDeleteFor] = useState<User | null>(null);
   const [deleteError, setDeleteError] = useState("");
   const [meId, setMeId] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ msg: string; error?: boolean } | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function showToast(msg: string, error = false) {
+    setToast({ msg, error });
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(null), 3200);
+  }
 
   async function fetchUsers() {
     const res = await fetch("/api/users");
@@ -94,10 +102,26 @@ export default function UsersPage() {
     }
   }
 
+  async function toggleActive(u: User) {
+    const next = !u.isActive;
+    setBusyId(u.id);
+    const res = await fetch(`/api/users/${u.id}`, {
+      method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ isActive: next }),
+    });
+    setBusyId(null);
+    if (res.ok) {
+      setUsers(prev => prev.map(x => (x.id === u.id ? { ...x, isActive: next } : x)));
+      showToast(next ? `${u.name} を有効化しました` : `${u.name} を無効化しました`);
+    } else {
+      const d = await res.json().catch(() => ({}));
+      showToast(d.error ?? "状態の更新に失敗しました", true);
+    }
+  }
+
   const pending = users.filter(u => u.status === "pending");
   const team = users.filter(u => u.status !== "pending");
   const adminCount = users.filter(u => u.role === "admin").length;
-  const activeCount = users.filter(u => u.status === "active").length;
+  const activeCount = users.filter(u => u.status === "active" && u.isActive).length;
 
   return (
     <>
@@ -147,10 +171,13 @@ export default function UsersPage() {
         <div className="table-wrap">
           {loading ? <p className="empty-state">読み込み中…</p> : (
             <table>
-              <thead><tr><th>ユーザー</th><th>会社</th><th>権限</th><th>状態</th><th>登録日</th><th><span className="sr-only">操作</span></th></tr></thead>
+              <thead><tr><th>ユーザー</th><th>会社</th><th>権限</th><th>状態</th><th>登録日</th><th className="col-action">有効/無効</th><th className="col-action">削除</th><th className="col-action">再確認</th></tr></thead>
               <tbody>
                 {team.map(u => {
-                  const st = STATUS_LABEL[u.status] ?? STATUS_LABEL.active;
+                  // 承認済み(active)でも管理者により無効化されている場合は「停止中」を表示
+                  const st = u.status === "active" && !u.isActive
+                    ? { label: "停止中", cls: "status-muted" }
+                    : STATUS_LABEL[u.status] ?? STATUS_LABEL.active;
                   return (
                     <tr key={u.id}>
                       <td><div className="user-cell"><UserAvatar initials={u.name.slice(0, 2)} /><div><strong>{u.name}</strong><span>{u.email}</span></div></div></td>
@@ -158,19 +185,31 @@ export default function UsersPage() {
                       <td><span className={`role-badge ${u.role === "admin" ? "admin" : ""}`}>{u.role === "admin" ? "管理者" : "メンバー"}</span></td>
                       <td><span className={`status-badge ${st.cls}`}><span className="status-dot" />{st.label}</span></td>
                       <td>{new Date(u.createdAt).toLocaleDateString("ja-JP")}</td>
-                      <td>
-                        <div className="row-actions">
-                          {u.status === "rejected" && (
-                            <button className="row-reconsider" onClick={() => decide(u.id, "reconsider")} disabled={busyId === u.id} aria-label={`${u.name}を再確認`}>
-                              <RotateCcw size={14} />再確認
-                            </button>
-                          )}
-                          {u.id !== meId && (
-                            <button className="row-delete" onClick={() => { setDeleteError(""); setDeleteFor(u); }} aria-label={`${u.name}を削除`}>
-                              <Trash2 size={15} />削除
-                            </button>
-                          )}
-                        </div>
+                      {/* 有効/無効 */}
+                      <td className="col-action">
+                        {u.status === "active" ? (
+                          <label className="row-toggle" title={u.id === meId ? "ご自身のアカウントは無効化できません" : u.isActive ? "クリックで無効化" : "クリックで有効化"}>
+                            <input type="checkbox" checked={u.isActive} disabled={u.id === meId || busyId === u.id} onChange={() => toggleActive(u)} aria-label={`${u.name}を${u.isActive ? "無効化" : "有効化"}`} />
+                            <span className="switch" />
+                            <span className="row-toggle-label">{u.isActive ? "有効" : "無効"}</span>
+                          </label>
+                        ) : <span className="row-na">—</span>}
+                      </td>
+                      {/* 削除 */}
+                      <td className="col-action">
+                        {u.id !== meId ? (
+                          <button className="row-delete" onClick={() => { setDeleteError(""); setDeleteFor(u); }} aria-label={`${u.name}を削除`}>
+                            <Trash2 size={15} />削除
+                          </button>
+                        ) : <span className="row-na">—</span>}
+                      </td>
+                      {/* 再確認 */}
+                      <td className="col-action">
+                        {u.status === "rejected" ? (
+                          <button className="row-reconsider" onClick={() => decide(u.id, "reconsider")} disabled={busyId === u.id} aria-label={`${u.name}を再確認`}>
+                            <RotateCcw size={14} />再確認
+                          </button>
+                        ) : <span className="row-na">—</span>}
                       </td>
                     </tr>
                   );
@@ -248,8 +287,15 @@ export default function UsersPage() {
 
       <div className="permission-note">
         <ShieldCheck size={20} />
-        <div><strong>承認フローについて</strong><p>新規ユーザーはメール認証（6桁コード）の後、管理者の承認を経て利用できます。承認・却下の結果は申請者へメールで通知されます。</p></div>
+        <div><strong>承認フローについて</strong><p>新規ユーザーはメール認証（6桁コード）の後、管理者の承認を経て利用できます。承認・却下の結果は申請者へメールで通知されます。無効化されたアカウントはログインできません。</p></div>
       </div>
+
+      {toast && (
+        <div className={`toast ${toast.error ? "danger" : "success"}`} role="status">
+          <span className="toast-icon">{toast.error ? <X size={20} /> : <CheckCircle2 size={20} />}</span>
+          <div><strong>{toast.msg}</strong></div>
+        </div>
+      )}
     </>
   );
 }

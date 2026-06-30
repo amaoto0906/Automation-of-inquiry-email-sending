@@ -34,9 +34,13 @@ export async function POST(request: NextRequest) {
     if (user.status === "rejected") {
       return NextResponse.json({ message: "この登録は承認されませんでした。管理者にお問い合わせください。" }, { status: 403 });
     }
-    // status が active 以外（不明な状態）は不可。無効化機能は廃止したため status を正とする。
+    // status が active 以外（不明な状態）は不可。
     if (user.status !== "active") {
       return NextResponse.json({ message: "このアカウントは現在利用できません。管理者にお問い合わせください。" }, { status: 403 });
+    }
+    // 管理者により無効化されたアカウントはログイン不可
+    if (!user.isActive) {
+      return NextResponse.json({ message: "このアカウントは管理者により無効化されています。管理者にお問い合わせください。" }, { status: 403 });
     }
 
     const token = await createSession({ id: user.id, email: user.email, name: user.name, role: user.role });

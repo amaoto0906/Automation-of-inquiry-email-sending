@@ -496,6 +496,20 @@ tbody tr:hover td { background: #f8fbff; }
 .row-reconsider:disabled { opacity: .5; cursor: not-allowed; }
 .row-delete { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 700; color: #e11d48; padding: 5px 10px; border-radius: 8px; transition: background .14s; }
 .row-delete:hover { background: #fff1f3; }
+/* 操作列（有効/無効・削除・再確認）を中央寄せの独立カラムに */
+.col-action { text-align: center; white-space: nowrap; }
+.row-na { color: var(--text-faint); }
+.row-toggle { display: inline-flex; align-items: center; gap: 9px; cursor: pointer; }
+.row-toggle input { position: absolute; opacity: 0; pointer-events: none; }
+.row-toggle .switch { width: 38px; height: 22px; }
+.row-toggle .switch::after { top: 3px; left: 3px; width: 16px; height: 16px; }
+.row-toggle input:checked + .switch { background: var(--grad-primary); }
+.row-toggle input:checked + .switch::after { transform: translateX(16px); }
+.row-toggle input:disabled + .switch { opacity: .55; cursor: not-allowed; }
+.row-toggle-label { min-width: 26px; font-size: 12px; font-weight: 700; color: #94a3b8; text-align: left; }
+.row-toggle input:checked ~ .row-toggle-label { color: #047857; }
+.toast.danger { border-color: #fecdd3; box-shadow: 0 20px 50px -14px rgba(120,30,40,.32); }
+.toast.danger .toast-icon { color: #e11d48; }
 .delete-confirm { display: flex; align-items: flex-start; gap: 13px; padding: 4px 0; }
 .delete-confirm-icon { display: flex; width: 44px; height: 44px; flex: 0 0 auto; align-items: center; justify-content: center; color: #e11d48; background: #fff1f3; border-radius: 12px; }
 .delete-confirm p { font-size: 13.5px; color: #5a6783; line-height: 1.7; }

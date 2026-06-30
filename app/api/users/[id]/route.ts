@@ -8,6 +8,20 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   const { id } = await params;
   const body = await request.json();
 
+  // 無効化（isActive=false）時のガード：自分自身・最後の有効な管理者は無効化不可
+  if (body.isActive === false) {
+    if (id === admin.id) {
+      return NextResponse.json({ error: "ご自身のアカウントは無効化できません。" }, { status: 400 });
+    }
+    const target = await prisma.user.findUnique({ where: { id }, select: { role: true } });
+    if (target?.role === "admin") {
+      const activeAdmins = await prisma.user.count({ where: { role: "admin", status: "active", isActive: true } });
+      if (activeAdmins <= 1) {
+        return NextResponse.json({ error: "最後の有効な管理者は無効化できません。" }, { status: 400 });
+      }
+    }
+  }
+
   const user = await prisma.user.update({
     where: { id },
     data: { name: body.name, role: body.role, isActive: body.isActive },

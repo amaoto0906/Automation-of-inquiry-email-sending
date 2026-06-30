@@ -294,6 +294,10 @@ html[data-theme="dark"] { background: var(--bg); }
 [data-theme="dark"] .toast { background: var(--surface); border-color: #1e5a44; box-shadow: 0 20px 50px -14px rgba(0,0,0,.6); }
 [data-theme="dark"] .toast strong { color: var(--text); }
 [data-theme="dark"] .toast-icon { color: #6ee7b7; }
+[data-theme="dark"] .toast.danger { border-color: #5a2233; }
+[data-theme="dark"] .toast.danger .toast-icon { color: #fb7185; }
+[data-theme="dark"] .row-toggle-label { color: #64748b; }
+[data-theme="dark"] .row-toggle input:checked ~ .row-toggle-label { color: #6ee7b7; }
 [data-theme="dark"] .unsaved-dot { color: #fcd34d; }
 [data-theme="dark"] .unsaved-dialog-icon { background: var(--warning-bg); color: #fcd34d; }
 
