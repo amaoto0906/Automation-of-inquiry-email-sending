@@ -138,9 +138,8 @@ export function SendLogsView() {
         <div className="bulk-bar">
           <span className="bulk-info">{!hydrated ? "読み込み中…" : selected.size > 0 ? `${selected.size} 件を選択中` : `全 ${filtered.length} 件`}</span>
           <div className="bulk-actions">
-            {selected.size > 0 && (
-              <ActionButton variant="danger" icon={<Trash2 size={15} />} onClick={() => setConfirm("selected")}>選択削除（{selected.size}）</ActionButton>
-            )}
+            {/* 未選択時も領域を確保（選択でレイアウトが動かない＝画面が揺れない） */}
+            <ActionButton variant="danger" icon={<Trash2 size={15} />} onClick={() => setConfirm("selected")} className={selected.size === 0 ? "slot-reserved" : ""} disabled={selected.size === 0} aria-hidden={selected.size === 0} tabIndex={selected.size === 0 ? -1 : undefined}>選択削除（{selected.size}）</ActionButton>
             <ActionButton variant="secondary" icon={<Trash2 size={15} />} disabled={!hydrated || logs.length === 0} onClick={() => setConfirm("all")}>すべて削除</ActionButton>
           </div>
         </div>

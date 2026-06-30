@@ -47,7 +47,10 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
 /* 横方向の予期せぬはみ出しを抑止（clipはスクロールコンテナを作らずsticky非破壊） */
-html { overflow-x: clip; }
+/* scrollbar-gutter: stable で縦スクロールバーの溝を常に確保し、
+   コンテンツ高の変化でスクロールバーが出没しても中央寄せレイアウトが横にずれない
+   （＝項目選択時などに画面が揺れる現象を防ぐ）。 */
+html { overflow-x: clip; scrollbar-gutter: stable; }
 body {
   font-family: var(--font-inter), var(--font-noto-jp), -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Meiryo", system-ui, sans-serif;
   background-color: var(--bg);

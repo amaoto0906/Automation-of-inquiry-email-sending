@@ -200,6 +200,8 @@ html[data-theme="dark"] { background: var(--bg); }
   color: var(--text);
 }
 [data-theme="dark"] input:hover, [data-theme="dark"] select:hover, [data-theme="dark"] textarea:hover { border-color: #4a597a; }
+/* チェックボックス／ラジオは入力欄用の背景・枠を当てず、ネイティブ表示＋accent-colorを維持 */
+[data-theme="dark"] input[type="checkbox"], [data-theme="dark"] input[type="radio"] { background: none; border: 0; box-shadow: none; accent-color: var(--primary-light); }
 [data-theme="dark"] input::placeholder, [data-theme="dark"] textarea::placeholder { color: var(--text-faint); }
 [data-theme="dark"] .input-with-icon,
 [data-theme="dark"] .search-input { background: var(--surface-2); border-color: var(--border-strong); }
