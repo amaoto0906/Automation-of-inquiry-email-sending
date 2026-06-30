@@ -174,6 +174,9 @@ html[data-theme="dark"] { background: var(--bg); }
 [data-theme="dark"] .search-input { background: var(--surface-2); border-color: var(--border-strong); }
 [data-theme="dark"] .button-secondary { background: var(--surface-2); border-color: var(--border-strong); color: var(--text); }
 [data-theme="dark"] .button-secondary:hover:not(:disabled) { background: #222d44; border-color: var(--primary); color: var(--primary-light); }
+/* パスワード更新ボタンはダークでも塗りブルーで入力欄と区別 */
+[data-theme="dark"] .button.pw-update-btn { background: var(--primary); border-color: var(--primary); color: #fff; box-shadow: 0 6px 16px -8px rgba(37,99,235,.6); }
+[data-theme="dark"] .button.pw-update-btn:hover:not(:disabled) { background: #3b82f6; border-color: #3b82f6; color: #fff; }
 [data-theme="dark"] .filter-button,
 [data-theme="dark"] .filter-chips button,
 [data-theme="dark"] .pagination button { background: var(--surface-2); border-color: var(--border); color: var(--text-muted); }

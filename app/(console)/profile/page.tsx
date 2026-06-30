@@ -13,7 +13,7 @@ interface Profile {
 export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [form, setForm] = useState({ name: "", company: "", department: "", position: "", phone: "" });
-  const [pw, setPw] = useState({ currentPassword: "", newPassword: "" });
+  const [pw, setPw] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
   const [saving, setSaving] = useState(false);
   const [savingPw, setSavingPw] = useState(false);
   const [msg, setMsg] = useState("");
@@ -45,13 +45,24 @@ export default function ProfilePage() {
 
   async function savePassword(e: React.FormEvent) {
     e.preventDefault();
-    setSavingPw(true); setMsg(""); setErr("");
+    setMsg(""); setErr("");
+    // クライアント側の事前検証
+    if (pw.newPassword.length < 8) {
+      setErr("新しいパスワードは8文字以上で入力してください。");
+      return;
+    }
+    if (pw.newPassword !== pw.confirmPassword) {
+      setErr("新しいパスワードと確認用パスワードが一致しません。");
+      return;
+    }
+    setSavingPw(true);
     const res = await fetch("/api/profile", {
-      method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(pw),
+      method: "PATCH", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ currentPassword: pw.currentPassword, newPassword: pw.newPassword }),
     });
     const data = await res.json().catch(() => ({}));
     setSavingPw(false);
-    if (res.ok) { setMsg("パスワードを変更しました。"); setPw({ currentPassword: "", newPassword: "" }); }
+    if (res.ok) { setMsg("パスワードを変更しました。"); setPw({ currentPassword: "", newPassword: "", confirmPassword: "" }); }
     else setErr(data.error ?? "パスワードの変更に失敗しました。");
   }
 
@@ -108,9 +119,13 @@ export default function ProfilePage() {
               <div className="input-with-icon"><ShieldCheck size={17} /><input id="cur-pw" type="password" value={pw.currentPassword} onChange={(e) => setPw((s) => ({ ...s, currentPassword: e.target.value }))} /></div>
             </div>
             <div className="field"><label htmlFor="new-pw">新しいパスワード（8文字以上）</label>
-              <div className="input-with-icon"><ShieldCheck size={17} /><input id="new-pw" type="password" minLength={8} value={pw.newPassword} onChange={(e) => setPw((s) => ({ ...s, newPassword: e.target.value }))} /></div>
+              <div className="input-with-icon"><ShieldCheck size={17} /><input id="new-pw" type="password" minLength={8} autoComplete="new-password" value={pw.newPassword} onChange={(e) => setPw((s) => ({ ...s, newPassword: e.target.value }))} /></div>
             </div>
-            <ActionButton type="submit" variant="secondary" loading={savingPw}>パスワードを更新</ActionButton>
+            <div className="field"><label htmlFor="confirm-pw">新しいパスワード（確認用）</label>
+              <div className="input-with-icon"><ShieldCheck size={17} /><input id="confirm-pw" type="password" minLength={8} autoComplete="new-password" value={pw.confirmPassword} onChange={(e) => setPw((s) => ({ ...s, confirmPassword: e.target.value }))} /></div>
+              {pw.confirmPassword.length > 0 && pw.newPassword !== pw.confirmPassword && <small className="field-hint error">パスワードが一致しません</small>}
+            </div>
+            <ActionButton type="submit" variant="secondary" loading={savingPw} className="pw-update-btn">パスワードを更新</ActionButton>
           </form>
         </div>
       </div>

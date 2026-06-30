@@ -526,6 +526,11 @@ tbody tr:hover td { background: #f8fbff; }
 /* プロフィール */
 .profile-side { display: flex; flex-direction: column; gap: 20px; }
 .input-with-icon.disabled { background: #f3f5f9; opacity: .8; }
+/* パスワード変更フォーム：更新ボタンを十分に離し、入力欄と区別できる塗りボタンに */
+.button.pw-update-btn { margin-top: 16px; width: 100%; justify-content: center; background: var(--primary); border: 1px solid var(--primary); color: #fff; box-shadow: 0 6px 16px -6px rgba(37,99,235,.5); }
+.button.pw-update-btn:hover:not(:disabled) { background: var(--primary-dark); border-color: var(--primary-dark); color: #fff; transform: translateY(-1px); }
+.field-hint { display: block; margin-top: 5px; font-size: 12px; }
+.field-hint.error { color: var(--danger); }
 .input-with-icon.disabled input { color: #8794ab; }
 
 /* レスポンシブ：左面を上部バンドに（〜820px） */
