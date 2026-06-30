@@ -114,6 +114,7 @@ export function AppShell({ children, user }: AppShellProps) {
   const [notifCount, setNotifCount] = useState(0);
   const [notifItems, setNotifItems] = useState<NotifItem[]>([]);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [usage, setUsage] = useState<{ todaySentCount: number; maxSendsPerDay: number } | null>(null);
   const notifRef = useRef<HTMLDivElement>(null);
 
   // 手動確認の未対応件数を localStorage から購読（削除すると即座にバッジへ反映）
@@ -135,11 +136,17 @@ export function AppShell({ children, user }: AppShellProps) {
     let active = true;
     const load = async () => {
       try {
-        const res = await fetch("/api/notifications");
-        if (res.ok && active) {
-          const d = await res.json();
+        const [notifRes, usageRes] = await Promise.all([
+          fetch("/api/notifications"),
+          fetch("/api/usage/today"),
+        ]);
+        if (notifRes.ok && active) {
+          const d = await notifRes.json();
           setNotifCount(d.count ?? 0);
           setNotifItems(d.items ?? []);
+        }
+        if (usageRes.ok && active) {
+          setUsage(await usageRes.json());
         }
       } catch {
         /* noop */
@@ -183,7 +190,7 @@ export function AppShell({ children, user }: AppShellProps) {
 
       <div className="operation-status">
         <span className="live-dot" />
-        <div><strong>安全運用中</strong><span>本日 18 / 50 件</span></div>
+        <div><strong>安全運用中</strong><span>本日 {usage ? `${usage.todaySentCount} / ${usage.maxSendsPerDay}` : "—"} 件</span></div>
       </div>
 
       <nav className="nav" aria-label="メインナビゲーション">

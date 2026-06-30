@@ -2,11 +2,45 @@ import Link from "next/link";
 import { MoreHorizontal, Play, Plus, Search } from "lucide-react";
 import { ActionButton } from "@/components/action-button";
 import { PageTitle } from "@/components/ui";
-import { keywords } from "@/lib/mock-data";
+import { prisma } from "@/lib/prisma";
 
 export const metadata = { title: "検索キーワード" };
 
-export default function KeywordsPage() {
+function fmtDateTime(date: Date): string {
+  return date.toLocaleString("ja-JP", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+}
+
+export default async function KeywordsPage() {
+  const monthStart = new Date();
+  monthStart.setDate(1);
+  monthStart.setHours(0, 0, 0, 0);
+
+  const [keywords, formRows, sentRows, monthUrlCount] = await Promise.all([
+    prisma.keyword.findMany({
+      orderBy: { createdAt: "desc" },
+      include: { _count: { select: { searchResults: true } } },
+    }),
+    prisma.contactPage.findMany({ where: { hasForm: true }, select: { searchResult: { select: { keywordId: true } } } }),
+    prisma.sendLog.findMany({ where: { status: "success" }, select: { contactPage: { select: { searchResult: { select: { keywordId: true } } } } } }),
+    prisma.searchResult.count({ where: { createdAt: { gte: monthStart } } }),
+  ]);
+
+  // キーワードIDごとに「フォーム検出数」「送信済み数」を集計
+  const formCounts = new Map<string, number>();
+  for (const r of formRows) {
+    const k = r.searchResult?.keywordId;
+    if (k) formCounts.set(k, (formCounts.get(k) ?? 0) + 1);
+  }
+  const sentCounts = new Map<string, number>();
+  for (const r of sentRows) {
+    const k = r.contactPage?.searchResult?.keywordId;
+    if (k) sentCounts.set(k, (sentCounts.get(k) ?? 0) + 1);
+  }
+
+  const total = keywords.length;
+  const activeCount = keywords.filter((k) => k.isActive).length;
+  const activeRate = total > 0 ? Math.round((activeCount / total) * 100) : 0;
+
   return (
     <>
       <PageTitle
@@ -16,10 +50,10 @@ export default function KeywordsPage() {
         action={<ActionButton icon={<Plus size={17} />}>キーワードを追加</ActionButton>}
       />
       <div className="summary-strip">
-        <div><span>登録済み</span><strong>10</strong><small>/ 月間上限 12</small></div>
-        <div><span>有効</span><strong>8</strong><small>現在収集中</small></div>
-        <div><span>今月の検出URL</span><strong>351</strong><small>重複除外後</small></div>
-        <div className="summary-progress"><span>月間利用状況</span><div className="progress-track"><i style={{ width: "83%" }} /></div><small>83%</small></div>
+        <div><span>登録済み</span><strong>{total}</strong><small>キーワード総数</small></div>
+        <div><span>有効</span><strong>{activeCount}</strong><small>現在収集中</small></div>
+        <div><span>今月の検出URL</span><strong>{monthUrlCount.toLocaleString()}</strong><small>今月の新規</small></div>
+        <div className="summary-progress"><span>稼働中の割合</span><div className="progress-track"><i style={{ width: `${activeRate}%` }} /></div><small>{activeRate}%</small></div>
       </div>
       <article className="panel">
         <div className="table-toolbar">
@@ -33,19 +67,23 @@ export default function KeywordsPage() {
           <table>
             <thead><tr><th>キーワード</th><th>検出URL</th><th>フォーム</th><th>送信済み</th><th>状態</th><th>最終更新</th><th><span className="sr-only">操作</span></th></tr></thead>
             <tbody>
-              {keywords.map((keyword) => (
+              {keywords.length === 0 ? (
+                <tr><td colSpan={7}><p className="empty-state">登録済みのキーワードはありません。</p></td></tr>
+              ) : keywords.map((keyword) => (
                 <tr key={keyword.id}>
                   <td><Link className="primary-link" href={`/keywords/${keyword.id}`}>{keyword.name}</Link></td>
-                  <td>{keyword.urls}</td><td>{keyword.forms}</td><td>{keyword.sent}</td>
-                  <td><span className={`toggle-status ${keyword.active ? "on" : ""}`}><i />{keyword.active ? "有効" : "停止中"}</span></td>
-                  <td className="muted-cell">{keyword.updated}</td>
+                  <td>{keyword._count.searchResults}</td>
+                  <td>{formCounts.get(keyword.id) ?? 0}</td>
+                  <td>{sentCounts.get(keyword.id) ?? 0}</td>
+                  <td><span className={`toggle-status ${keyword.isActive ? "on" : ""}`}><i />{keyword.isActive ? "有効" : "停止中"}</span></td>
+                  <td className="muted-cell">{fmtDateTime(new Date(keyword.updatedAt))}</td>
                   <td><button className="row-action" aria-label={`${keyword.name}の操作`}><MoreHorizontal size={18} /></button></td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-        <div className="table-footer"><span>全 10 件中 1〜4 件を表示</span><div className="pagination"><button disabled>前へ</button><button className="current">1</button><button>2</button><button>3</button><button>次へ</button></div></div>
+        <div className="table-footer"><span>全 {total} 件を表示</span></div>
       </article>
     </>
   );

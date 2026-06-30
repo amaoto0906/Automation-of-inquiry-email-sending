@@ -549,6 +549,8 @@ tbody tr.row-selected:hover td { background: #e7efff; }
 .row-reconsider:disabled { opacity: .5; cursor: not-allowed; }
 .row-delete { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 700; color: #e11d48; padding: 5px 10px; border-radius: 8px; transition: background .14s; }
 .row-delete:hover { background: #fff1f3; }
+/* 操作セル内で「確認/詳細」ボタンと行削除ボタンを横並びにする */
+.cell-actions { display: inline-flex; align-items: center; gap: 8px; }
 /* 操作列（有効/無効・削除・再確認）を中央寄せの独立カラムに */
 .col-action { text-align: center; white-space: nowrap; }
 .row-na { color: var(--text-faint); }
