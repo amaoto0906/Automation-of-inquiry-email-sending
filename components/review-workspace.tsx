@@ -11,6 +11,8 @@ import {
   FileText,
   LoaderCircle,
   LockKeyhole,
+  Pencil,
+  RotateCcw,
   Send,
   ShieldAlert,
   ShieldCheck,
@@ -29,9 +31,25 @@ const fields = [
   ["件名", "業務効率化のご提案について"],
 ];
 
+const DEFAULT_MESSAGE = `株式会社ネクサス
+ご担当者様
+
+突然のご連絡失礼いたします。株式会社オルタナティブの佐藤と申します。
+
+貴社のWebサイトを拝見し、弊社の業務自動化支援がお役に立てるのではないかと思い、ご連絡いたしました。
+
+弊社では、日々の定型業務を安全に効率化するシステムの設計・開発を行っております。ご関心がございましたら、15分ほどオンラインでご説明の機会をいただけますと幸いです。
+
+何卒よろしくお願いいたします。
+
+株式会社オルタナティブ
+佐藤 美咲
+03-1234-5678`;
+
 export function ReviewWorkspace({ targetId }: { targetId: string }) {
   const hasCaptcha = targetId.includes("captcha") || targetId.endsWith("2");
   const [confirmed, setConfirmed] = useState(false);
+  const [message, setMessage] = useState(DEFAULT_MESSAGE);
   const [sending, setSending] = useState(false);
   const [completed, setCompleted] = useState<"sent" | "manual" | "excluded" | null>(null);
   const canSend = confirmed && !hasCaptcha && !sending && !completed;
@@ -99,15 +117,22 @@ export function ReviewWorkspace({ targetId }: { targetId: string }) {
           </article>
 
           <article className="panel message-panel">
-            <div className="section-header"><div><p className="eyebrow">MESSAGE</p><h2>問い合わせ文面</h2></div><span className="template-chip"><FileText size={14} />標準営業テンプレート v2</span></div>
-            <div className="message-preview">
-              <p>株式会社ネクサス<br />ご担当者様</p>
-              <p>突然のご連絡失礼いたします。株式会社オルタナティブの佐藤と申します。</p>
-              <p>貴社のWebサイトを拝見し、弊社の業務自動化支援がお役に立てるのではないかと思い、ご連絡いたしました。</p>
-              <p>弊社では、日々の定型業務を安全に効率化するシステムの設計・開発を行っております。ご関心がございましたら、15分ほどオンラインでご説明の機会をいただけますと幸いです。</p>
-              <p>何卒よろしくお願いいたします。</p>
-              <p>株式会社オルタナティブ<br />佐藤 美咲<br />03-1234-5678</p>
+            <div className="section-header">
+              <div><p className="eyebrow">MESSAGE</p><h2>問い合わせ文面</h2></div>
+              <div className="message-tools">
+                <span className="template-chip"><FileText size={14} />標準営業テンプレート v2</span>
+                <button type="button" className="text-link" onClick={() => setMessage(DEFAULT_MESSAGE)} disabled={message === DEFAULT_MESSAGE}><RotateCcw size={13} />元に戻す</button>
+              </div>
             </div>
+            <textarea
+              className="message-editor"
+              value={message}
+              onChange={(event) => setMessage(event.target.value)}
+              rows={14}
+              spellCheck={false}
+              aria-label="問い合わせ文面"
+            />
+            <p className="message-edit-hint"><Pencil size={12} />送信前に文面を直接編集できます。{`${message.length}`}文字</p>
           </article>
         </div>
 

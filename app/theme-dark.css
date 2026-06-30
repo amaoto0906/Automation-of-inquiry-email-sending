@@ -137,6 +137,22 @@ html[data-theme="dark"] { background: var(--bg); }
 [data-theme="dark"] .setting-heading h2,
 [data-theme="dark"] .field label { color: var(--text); }
 
+/* 本文テキスト：ダークでは明色にして可読性を確保 */
+[data-theme="dark"] .message-editor,
+[data-theme="dark"] .message-preview,
+[data-theme="dark"] .message-preview p { color: var(--text); }
+[data-theme="dark"] .message-editor { background: var(--surface-2); border-color: var(--border); }
+[data-theme="dark"] .message-editor:focus-visible { background: var(--surface); border-color: var(--primary); }
+
+/* アクセント文字（緑＝有効/使用中、青＝リンク）はライト向けの濃色のままだと
+   ダークで沈むため、ダークでは明色へ反転させる */
+[data-theme="dark"] .detected-label,
+[data-theme="dark"] .safety-list b,
+[data-theme="dark"] .policy-banner b,
+[data-theme="dark"] .template-card-header b,
+[data-theme="dark"] .toggle-status.on { color: #6ee7b7; }
+[data-theme="dark"] .primary-link { color: var(--primary-light); }
+
 /* ===== ダッシュボード・ヒーロー ===== */
 [data-theme="dark"] .dashboard-hero {
   background: linear-gradient(120deg, #10182b, #0d1626);
@@ -149,7 +165,8 @@ html[data-theme="dark"] { background: var(--bg); }
 [data-theme="dark"] .hero-content p { color: var(--text-muted); }
 [data-theme="dark"] .hero-label { color: var(--primary-light); }
 [data-theme="dark"] .hero-score { background: rgba(255, 255, 255, 0.05); border-color: var(--border); }
-[data-theme="dark"] .score-ring { box-shadow: inset 0 0 0 6px #10182b; }
+[data-theme="dark"] .score-ring { box-shadow: inset 0 0 0 6px #10182b; color: var(--primary-light); }
+[data-theme="dark"] .score-ring span { color: var(--primary-light); }
 [data-theme="dark"] .score-ring small, [data-theme="dark"] .hero-score p { color: var(--text-muted); }
 [data-theme="dark"] .flow-icon { background: var(--primary-bg); border-color: var(--border); }
 
