@@ -4,6 +4,7 @@ import { useCallback, useRef, useState } from "react";
 import { AlertTriangle, CheckCircle2, Copy, FileText, MoreHorizontal, Plus, Trash2, X } from "lucide-react";
 import { ActionButton } from "@/components/action-button";
 import { PageTitle } from "@/components/ui";
+import { usePersistentState } from "@/lib/hooks/use-persistent-state";
 
 interface Template {
   id: string;
@@ -35,8 +36,14 @@ const INITIAL: Template[] = [
   },
 ];
 
-let nextId = 4;
-function genId() { return `t${nextId++}`; }
+// 既存テンプレートの最大番号 +1 から採番（リロードで localStorage 復元しても衝突しない）
+function genId(existing: Template[]) {
+  const max = existing.reduce((m, t) => {
+    const n = Number(t.id.replace(/^t/, ""));
+    return Number.isFinite(n) && n > m ? n : m;
+  }, 0);
+  return `t${max + 1}`;
+}
 
 function preview(body: string) {
   const line = body.split("\n").find((l) => l.trim()) ?? "";
@@ -44,7 +51,8 @@ function preview(body: string) {
 }
 
 export function MessageTemplatesView() {
-  const [templates, setTemplates] = useState<Template[]>(INITIAL);
+  // ページ遷移・リロードを跨いで作成・編集・削除を保持
+  const [templates, setTemplates] = usePersistentState<Template[]>("message-templates", INITIAL);
   const [selectedId, setSelectedId] = useState<string>("t1");
   const [form, setForm] = useState<{ title: string; subject: string; body: string } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Template | null>(null);
@@ -88,7 +96,7 @@ export function MessageTemplatesView() {
   }
 
   function duplicateTemplate(t: Template) {
-    const copy: Template = { ...t, id: genId(), title: `${t.title}（コピー）`, active: false, version: 1, updated: "たった今" };
+    const copy: Template = { ...t, id: genId(templates), title: `${t.title}（コピー）`, active: false, version: 1, updated: "たった今" };
     setTemplates((prev) => [...prev, copy]);
     setSelectedId(copy.id);
     showToast(`「${t.title}」を複製しました`);
@@ -103,7 +111,7 @@ export function MessageTemplatesView() {
 
   function createTemplate() {
     const t: Template = {
-      id: genId(), title: "新しいテンプレート", version: 1, active: false,
+      id: genId(templates), title: "新しいテンプレート", version: 1, active: false,
       updated: "たった今", subject: "", body: "",
     };
     setTemplates((prev) => [...prev, t]);

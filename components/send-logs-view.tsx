@@ -5,6 +5,7 @@ import { AlertTriangle, CheckCircle2, Download, Search, Send, Trash2, X } from "
 import { ActionButton } from "@/components/action-button";
 import { PageTitle, StatusBadge, UserAvatar } from "@/components/ui";
 import { recentLogs } from "@/lib/mock-data";
+import { usePersistentState } from "@/lib/hooks/use-persistent-state";
 import { statusLabels } from "@/lib/types";
 import type { OutreachStatus } from "@/lib/types";
 
@@ -38,7 +39,8 @@ function buildCsv(rows: LogRow[]): string {
 }
 
 export function SendLogsView() {
-  const [logs, setLogs] = useState<LogRow[]>(INITIAL);
+  // ページ遷移・リロードを跨いで削除状態を保持
+  const [logs, setLogs] = usePersistentState<LogRow[]>("send-logs", INITIAL);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("all");

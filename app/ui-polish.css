@@ -637,6 +637,7 @@ tbody tr.row-selected:hover td { background: #e7efff; }
 .template-layout { grid-template-columns: minmax(330px,.9fr) minmax(0,1.45fr); gap: 22px; }
 .template-card { border-radius: 12px; }
 .template-card.selected { border-color: #79a8ec; box-shadow: 0 0 0 4px rgba(59,130,246,.09), 0 12px 28px rgba(38,76,125,.08); }
+.template-card.selected:hover { transform: none !important; box-shadow: 0 0 0 4px rgba(59,130,246,.09), 0 12px 28px rgba(38,76,125,.08); }
 .editor-card { position: relative; overflow: hidden; }
 /* テンプレートカードのフッター削除ボタン */
 .template-card footer button.danger-link { color: #e11d48; }
@@ -656,6 +657,7 @@ tbody tr.row-selected:hover td { background: #e7efff; }
 .manual-item { border-color: #e0e8f1; border-radius: 12px; background: linear-gradient(90deg,#fff,#fafcff); transition: transform .17s ease, box-shadow .17s ease; }
 .manual-item:hover { transform: translateX(2px); box-shadow: 0 10px 24px rgba(30,60,100,.07); }
 .manual-item.row-selected { background: #eef4ff; border-color: #c5d8f8; transform: none; }
+.manual-item.row-selected:hover { transform: none !important; box-shadow: none; }
 .manual-item-check { flex: 0 0 auto; width: 16px; height: 16px; cursor: pointer; accent-color: #3b82f6; }
 .manual-item-del { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 8px; color: #94a3b8; transition: background .15s, color .15s; margin-left: 4px; }
 .manual-item-del:hover { background: #fff1f3; color: #e11d48; }

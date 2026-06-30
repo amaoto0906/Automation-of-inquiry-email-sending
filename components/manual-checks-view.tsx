@@ -5,6 +5,7 @@ import { AlertTriangle, CheckCircle2, Search, ShieldCheck, Trash2, X } from "luc
 import { ActionButton } from "@/components/action-button";
 import { PageTitle, UserAvatar } from "@/components/ui";
 import { manualChecks } from "@/lib/mock-data";
+import { usePersistentState } from "@/lib/hooks/use-persistent-state";
 
 interface CheckItem {
   id: string;
@@ -19,7 +20,8 @@ interface CheckItem {
 const INITIAL: CheckItem[] = manualChecks.map((c, i) => ({ ...c, id: `mc-${i}`, done: false }));
 
 export function ManualChecksView() {
-  const [items, setItems] = useState<CheckItem[]>(INITIAL);
+  // ページ遷移・リロードを跨いで削除状態を保持
+  const [items, setItems] = usePersistentState<CheckItem[]>("manual-checks", INITIAL);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [query, setQuery] = useState("");
   const [tab, setTab] = useState<"pending" | "done">("pending");
