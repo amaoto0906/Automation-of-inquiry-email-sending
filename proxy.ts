@@ -8,12 +8,13 @@ const publicPaths = [
   "/api/auth/register",
   "/api/auth/verify",
   "/api/auth/resend",
+  "/api/auth/password-reset",
 ];
 
 // 管理者専用ページ（メンバーはダッシュボードへリダイレクト）
 const adminPagePaths = ["/users", "/settings", "/sheet-sync"];
 // 管理者専用API（メンバーは403）
-const adminApiPaths = ["/api/sheet-sync"];
+const adminApiPaths = ["/api/sheet-sync", "/api/password-resets"];
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;

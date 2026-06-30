@@ -238,21 +238,24 @@ export function AppShell({ children, user }: AppShellProps) {
                     {notifItems.length === 0 ? (
                       <div className="notif-empty"><Bell size={22} /><span>新しい通知はありません</span></div>
                     ) : (
-                      notifItems.map((item) => (
-                        <Link key={item.id} href="/users" className="notif-row" onClick={() => setNotifOpen(false)}>
-                          <span className="notif-row-icon"><UserPlus size={16} /></span>
-                          <div className="notif-row-body">
-                            <strong>{item.name} さんが新規登録</strong>
-                            <span>{item.company ?? item.email}・承認待ち</span>
-                          </div>
-                          <span className="notif-row-time">{timeAgo(item.createdAt)}</span>
-                        </Link>
-                      ))
+                      notifItems.map((item) => {
+                        const isReset = item.type === "password_reset";
+                        return (
+                          <Link key={item.id} href="/users" className="notif-row" onClick={() => setNotifOpen(false)}>
+                            <span className={`notif-row-icon${isReset ? " reset" : ""}`}>{isReset ? <KeyRound size={16} /> : <UserPlus size={16} />}</span>
+                            <div className="notif-row-body">
+                              <strong>{item.name} さんが{isReset ? "パスワード再設定を申請" : "新規登録"}</strong>
+                              <span>{isReset ? `${item.email}・対応待ち` : `${item.company ?? item.email}・承認待ち`}</span>
+                            </div>
+                            <span className="notif-row-time">{timeAgo(item.createdAt)}</span>
+                          </Link>
+                        );
+                      })
                     )}
                   </div>
                   {notifItems.length > 0 && (
                     <Link href="/users" className="notif-foot" onClick={() => setNotifOpen(false)}>
-                      承認待ち一覧をすべて表示
+                      ユーザー管理ですべて表示
                     </Link>
                   )}
                 </div>

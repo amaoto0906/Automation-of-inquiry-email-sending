@@ -33,6 +33,20 @@ model User {
   activityLogs    ActivityLog[]
   loginLogs       LoginLog[]
   reviewActions   ReviewAction[]
+  passwordResets  PasswordResetRequest[]
+}
+
+// パスワードリセット申請（管理者が確認のうえ実行）
+model PasswordResetRequest {
+  id           String    @id @default(cuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status       String    @default("pending") // pending | completed
+  createdAt    DateTime  @default(now())
+  resolvedAt   DateTime?
+  resolvedById String?
+
+  @@index([status])
 }
 
 // メール認証コード（6桁・2段階認証）

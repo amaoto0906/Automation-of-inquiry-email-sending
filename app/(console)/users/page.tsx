@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Building2, Check, CheckCircle2, Clock, Plus, RotateCcw, ShieldCheck, Trash2, UserCheck, UsersRound, X, Eye, EyeOff } from "lucide-react";
+import { Building2, Check, CheckCircle2, Clock, KeyRound, Plus, RotateCcw, ShieldCheck, Trash2, UserCheck, UsersRound, X, Eye, EyeOff } from "lucide-react";
 import { ActionButton } from "@/components/action-button";
 import { PageTitle, UserAvatar } from "@/components/ui";
 
@@ -17,6 +17,15 @@ interface User {
   department: string | null;
   position: string | null;
   phone: string | null;
+  createdAt: string;
+}
+
+interface ResetRequest {
+  id: string;
+  userId: string;
+  name: string;
+  email: string;
+  company: string | null;
   createdAt: string;
 }
 
@@ -43,6 +52,7 @@ export default function UsersPage() {
   const [meId, setMeId] = useState<string | null>(null);
   const [toast, setToast] = useState<{ msg: string; error?: boolean } | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [resets, setResets] = useState<ResetRequest[]>([]);
 
   function showToast(msg: string, error = false) {
     setToast({ msg, error });
@@ -55,8 +65,13 @@ export default function UsersPage() {
     if (res.ok) setUsers((await res.json()).users ?? []);
     setLoading(false);
   }
+  async function fetchResets() {
+    const res = await fetch("/api/password-resets");
+    if (res.ok) setResets((await res.json()).requests ?? []);
+  }
   useEffect(() => {
     fetchUsers();
+    fetchResets();
     fetch("/api/profile").then(async (r) => { if (r.ok) setMeId((await r.json()).user?.id ?? null); });
   }, []);
 
@@ -118,6 +133,32 @@ export default function UsersPage() {
     }
   }
 
+  async function resetPassword(req: ResetRequest) {
+    setBusyId(req.id);
+    const res = await fetch(`/api/password-resets/${req.id}`, { method: "POST" });
+    setBusyId(null);
+    if (res.ok) {
+      const d = await res.json().catch(() => ({}));
+      setResets(prev => prev.filter(r => r.id !== req.id));
+      showToast(`${req.name} のパスワードを「${d.tempPassword ?? "12345678"}」にリセットしました`);
+    } else {
+      const d = await res.json().catch(() => ({}));
+      showToast(d.error ?? "リセットに失敗しました", true);
+    }
+  }
+
+  async function dismissReset(req: ResetRequest) {
+    setBusyId(req.id);
+    const res = await fetch(`/api/password-resets/${req.id}`, { method: "DELETE" });
+    setBusyId(null);
+    if (res.ok) {
+      setResets(prev => prev.filter(r => r.id !== req.id));
+      showToast(`${req.name} のリセット申請を却下しました`);
+    } else {
+      showToast("却下に失敗しました", true);
+    }
+  }
+
   const pending = users.filter(u => u.status === "pending");
   const team = users.filter(u => u.status !== "pending");
   const adminCount = users.filter(u => u.role === "admin").length;
@@ -158,6 +199,31 @@ export default function UsersPage() {
                 <div className="approval-actions">
                   <ActionButton loading={busyId === u.id} onClick={() => decide(u.id, "approve")} icon={<Check size={15} />}>承認</ActionButton>
                   <ActionButton variant="secondary" onClick={() => setRejectFor(u)}>却下</ActionButton>
+                </div>
+              </div>
+            ))}
+          </div>
+        </article>
+      )}
+
+      {/* パスワードリセット申請 */}
+      {resets.length > 0 && (
+        <article className="panel approval-section reset-section">
+          <div className="section-header">
+            <div><h2>パスワードリセット申請（{resets.length}）</h2><p>内容を確認し、リセットを実行してください。リセット後のパスワードは「12345678」です。</p></div>
+          </div>
+          <div className="approval-list">
+            {resets.map(req => (
+              <div className="approval-item" key={req.id}>
+                <span className="reset-avatar"><KeyRound size={20} /></span>
+                <div className="approval-info">
+                  <strong>{req.name}</strong>
+                  <span className="approval-sub">{req.email}{req.company ? `・${req.company}` : ""}</span>
+                  <span className="detected-label reset"><Clock size={12} />{new Date(req.createdAt).toLocaleString("ja-JP")} に申請</span>
+                </div>
+                <div className="approval-actions">
+                  <ActionButton loading={busyId === req.id} onClick={() => resetPassword(req)} icon={<KeyRound size={15} />}>パスワードリセット</ActionButton>
+                  <ActionButton variant="secondary" disabled={busyId === req.id} onClick={() => dismissReset(req)}>却下</ActionButton>
                 </div>
               </div>
             ))}

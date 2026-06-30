@@ -184,6 +184,10 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
 .notif-row:last-child { border-bottom: 0; }
 .notif-row:hover { background: #f6f9fe; }
 .notif-row-icon { display: flex; width: 36px; height: 36px; flex: 0 0 auto; align-items: center; justify-content: center; color: #2563eb; background: #eaf2ff; border-radius: 10px; }
+.notif-row-icon.reset { color: #b45309; background: #fef3da; }
+.reset-done { display: flex; align-items: flex-start; gap: 13px; padding: 6px 0 2px; }
+.reset-done-icon { display: flex; flex: 0 0 auto; color: #059669; }
+.reset-done p { font-size: 13.5px; line-height: 1.7; color: var(--text); }
 .notif-row-body { flex: 1; min-width: 0; }
 .notif-row-body strong { display: block; font-size: 13px; font-weight: 700; color: #13213b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .notif-row-body span { display: block; font-size: 12px; color: #6a7b93; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -487,6 +491,11 @@ tbody tr:hover td { background: #f8fbff; }
 .approval-info strong { font-size: 15px; }
 .approval-meta { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #5a6783; }
 .approval-sub { font-size: 12px; color: #93a1b6; }
+/* パスワードリセット申請セクション */
+.reset-section { border-color: #d9e2f2; background: linear-gradient(180deg, #fafcff, #fff); }
+.reset-section .approval-item { border-color: #e0e7f3; }
+.reset-avatar { display: inline-flex; flex: 0 0 auto; width: 44px; height: 44px; align-items: center; justify-content: center; color: #b45309; background: #fef3da; border: 1px solid #f6e2bd; border-radius: 12px; }
+.detected-label.reset { color: #b45309; background: #fef3da; }
 .approval-actions { display: flex; gap: 8px; flex: 0 0 auto; }
 
 /* ユーザー行アクション（再確認・削除） */
