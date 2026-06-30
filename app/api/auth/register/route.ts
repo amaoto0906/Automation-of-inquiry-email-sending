@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/auth/password";
 import { issueVerificationCode } from "@/lib/auth/verification";
-import { sendVerificationEmail, isEmailConfigured } from "@/lib/email";
+import { sendVerificationEmail } from "@/lib/email";
 
 export async function POST(request: NextRequest) {
   try {
@@ -59,8 +59,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       ok: true,
       email,
-      // モックモード（SMTP未設定）の場合のみ、デモ用にコードを返す
-      devCode: !isEmailConfigured() ? code : undefined,
+      // モックモード（SMTP未設定）の場合のみ、デモ用にコードを返す。実送信時は返さない。
+      devCode: sent.mock ? code : undefined,
     });
   } catch (err) {
     console.error("登録エラー:", err);

@@ -19,18 +19,58 @@ export default function ProfilePage() {
   const [msg, setMsg] = useState("");
   const [err, setErr] = useState("");
 
-  useEffect(() => {
-    fetch("/api/profile").then(async (r) => {
-      if (r.ok) {
-        const { user } = await r.json();
-        setProfile(user);
-        setForm({
-          name: user.name ?? "", company: user.company ?? "",
-          department: user.department ?? "", position: user.position ?? "", phone: user.phone ?? "",
-        });
-      }
+  // メールアドレス変更フロー
+  const [emailStep, setEmailStep] = useState<"idle" | "code">("idle");
+  const [newEmail, setNewEmail] = useState("");
+  const [emailCode, setEmailCode] = useState("");
+  const [emailDevCode, setEmailDevCode] = useState<string | null>(null);
+  const [emailBusy, setEmailBusy] = useState(false);
+
+  async function fetchProfile() {
+    const r = await fetch("/api/profile");
+    if (r.ok) {
+      const { user } = await r.json();
+      setProfile(user);
+      setForm({
+        name: user.name ?? "", company: user.company ?? "",
+        department: user.department ?? "", position: user.position ?? "", phone: user.phone ?? "",
+      });
+    }
+  }
+  useEffect(() => { fetchProfile(); }, []);
+
+  async function requestEmailCode(e: React.FormEvent) {
+    e.preventDefault();
+    setEmailBusy(true); setMsg(""); setErr("");
+    const res = await fetch("/api/profile/email", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "request", newEmail }),
     });
-  }, []);
+    const d = await res.json().catch(() => ({}));
+    setEmailBusy(false);
+    if (res.ok) { setEmailDevCode(d.devCode ?? null); setEmailStep("code"); }
+    else setErr(d.error ?? "確認コードの送信に失敗しました。");
+  }
+
+  async function verifyEmailCode(e: React.FormEvent) {
+    e.preventDefault();
+    setEmailBusy(true); setMsg(""); setErr("");
+    const res = await fetch("/api/profile/email", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "verify", newEmail, code: emailCode }),
+    });
+    const d = await res.json().catch(() => ({}));
+    setEmailBusy(false);
+    if (res.ok) {
+      setEmailStep("idle"); setEmailCode(""); setEmailDevCode(null);
+      const changedTo = newEmail;
+      setNewEmail("");
+      if (d.updated) { setMsg(`メールアドレスを ${changedTo} に変更しました。`); fetchProfile(); }
+      else setMsg("メールアドレス変更を申請しました。管理者の承認後に反映されます。");
+    } else setErr(d.error ?? "認証に失敗しました。");
+  }
+
+  function cancelEmailChange() {
+    setEmailStep("idle"); setEmailCode(""); setEmailDevCode(null); setErr("");
+  }
 
   async function saveProfile(e: React.FormEvent) {
     e.preventDefault();
@@ -99,7 +139,7 @@ export default function ProfilePage() {
           <div className="field">
             <label>メールアドレス</label>
             <div className="input-with-icon disabled"><Mail size={17} /><input value={profile?.email ?? ""} disabled /></div>
-            <small className="helper-text">メールアドレスは変更できません</small>
+            <small className="helper-text">変更は右の「メールアドレス変更」から行えます</small>
           </div>
           <ActionButton type="submit" loading={saving} icon={<Save size={16} />}>変更を保存</ActionButton>
         </form>
@@ -112,6 +152,37 @@ export default function ProfilePage() {
               <div><dt><Mail size={15} />メール</dt><dd>{profile?.email}</dd></div>
             </dl>
           </article>
+
+          <form className="panel" onSubmit={emailStep === "idle" ? requestEmailCode : verifyEmailCode}>
+            <div className="section-header"><div><h2>メールアドレス変更</h2></div></div>
+            {emailStep === "idle" ? (
+              <>
+                <div className="field"><label htmlFor="new-email">新しいメールアドレス</label>
+                  <div className="input-with-icon"><Mail size={17} /><input id="new-email" type="email" autoComplete="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="new@example.jp" required /></div>
+                </div>
+                <small className="helper-text">
+                  {profile?.role === "admin"
+                    ? "新しいアドレスに確認コードを送信します。認証後すぐに変更されます。"
+                    : "新しいアドレスに確認コードを送信します。認証後、管理者の承認を経て変更されます。"}
+                </small>
+                <ActionButton type="submit" variant="secondary" loading={emailBusy} icon={<Mail size={16} />} className="pw-update-btn">確認コードを送信</ActionButton>
+              </>
+            ) : (
+              <>
+                <p className="action-description"><strong>{newEmail}</strong> 宛に6桁の確認コードを送信しました。</p>
+                {emailDevCode && (
+                  <div className="dev-code-note">デモ環境のため、コードを画面に表示しています：<strong>{emailDevCode}</strong></div>
+                )}
+                <div className="field"><label htmlFor="email-code">確認コード（6桁）</label>
+                  <input id="email-code" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={emailCode} onChange={(e) => setEmailCode(e.target.value.replace(/\D/g, ""))} placeholder="000000" required />
+                </div>
+                <div className="email-verify-actions">
+                  <ActionButton type="submit" loading={emailBusy} disabled={emailCode.length !== 6} icon={<CheckCircle2 size={16} />}>{profile?.role === "admin" ? "認証して変更" : "認証して申請"}</ActionButton>
+                  <ActionButton type="button" variant="ghost" onClick={cancelEmailChange}>戻る</ActionButton>
+                </div>
+              </>
+            )}
+          </form>
 
           <form className="panel" onSubmit={savePassword}>
             <div className="section-header"><div><h2>パスワード変更</h2></div></div>

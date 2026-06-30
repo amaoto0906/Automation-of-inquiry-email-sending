@@ -34,6 +34,21 @@ model User {
   loginLogs       LoginLog[]
   reviewActions   ReviewAction[]
   passwordResets  PasswordResetRequest[]
+  emailChanges    EmailChangeRequest[]
+}
+
+// メールアドレス変更申請（一般ユーザーは管理者承認制）
+model EmailChangeRequest {
+  id           String    @id @default(cuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  newEmail     String
+  status       String    @default("pending") // pending | completed
+  createdAt    DateTime  @default(now())
+  resolvedAt   DateTime?
+  resolvedById String?
+
+  @@index([status])
 }
 
 // パスワードリセット申請（管理者が確認のうえ実行）

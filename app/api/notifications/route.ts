@@ -11,10 +11,11 @@ export async function GET(request: NextRequest) {
   let items: NotifItem[] = [];
   let pendingApprovals = 0;
   let pendingResets = 0;
+  let pendingEmailChanges = 0;
 
-  // 承認待ちの新規登録・パスワードリセット申請は管理者への通知
+  // 承認待ちの新規登録・パスワードリセット・メール変更申請は管理者への通知
   if (session.role === "admin") {
-    const [pending, resets] = await Promise.all([
+    const [pending, resets, emailChanges] = await Promise.all([
       prisma.user.findMany({
         where: { status: "pending" },
         select: { id: true, name: true, company: true, email: true, createdAt: true },
@@ -27,10 +28,17 @@ export async function GET(request: NextRequest) {
         orderBy: { createdAt: "desc" },
         take: 12,
       }),
+      prisma.emailChangeRequest.findMany({
+        where: { status: "pending" },
+        select: { id: true, createdAt: true, newEmail: true, user: { select: { name: true, company: true } } },
+        orderBy: { createdAt: "desc" },
+        take: 12,
+      }),
     ]);
 
     pendingApprovals = pending.length;
     pendingResets = resets.length;
+    pendingEmailChanges = emailChanges.length;
 
     const approvalItems: NotifItem[] = pending.map((u) => ({
       id: u.id, type: "approval", name: u.name, company: u.company, email: u.email, createdAt: u.createdAt,
@@ -38,8 +46,11 @@ export async function GET(request: NextRequest) {
     const resetItems: NotifItem[] = resets.map((r) => ({
       id: r.id, type: "password_reset", name: r.user.name, company: r.user.company, email: r.user.email, createdAt: r.createdAt,
     }));
+    const emailItems: NotifItem[] = emailChanges.map((e) => ({
+      id: e.id, type: "email_change", name: e.user.name, company: e.user.company, email: e.newEmail, createdAt: e.createdAt,
+    }));
 
-    items = [...approvalItems, ...resetItems].sort(
+    items = [...approvalItems, ...resetItems, ...emailItems].sort(
       (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
     );
   }
@@ -47,7 +58,8 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     pendingApprovals,
     pendingResets,
-    count: pendingApprovals + pendingResets,
+    pendingEmailChanges,
+    count: pendingApprovals + pendingResets + pendingEmailChanges,
     items,
   });
 }

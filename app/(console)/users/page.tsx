@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Building2, Check, CheckCircle2, Clock, KeyRound, Plus, RotateCcw, ShieldCheck, Trash2, UserCheck, UsersRound, X, Eye, EyeOff } from "lucide-react";
+import { Building2, Check, CheckCircle2, Clock, KeyRound, Mail, Plus, RotateCcw, ShieldCheck, Trash2, UserCheck, UsersRound, X, Eye, EyeOff } from "lucide-react";
 import { ActionButton } from "@/components/action-button";
 import { PageTitle, UserAvatar } from "@/components/ui";
 
@@ -25,6 +25,16 @@ interface ResetRequest {
   userId: string;
   name: string;
   email: string;
+  company: string | null;
+  createdAt: string;
+}
+
+interface EmailChangeRequest {
+  id: string;
+  userId: string;
+  name: string;
+  currentEmail: string;
+  newEmail: string;
   company: string | null;
   createdAt: string;
 }
@@ -53,6 +63,7 @@ export default function UsersPage() {
   const [toast, setToast] = useState<{ msg: string; error?: boolean } | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [resets, setResets] = useState<ResetRequest[]>([]);
+  const [emailChanges, setEmailChanges] = useState<EmailChangeRequest[]>([]);
 
   function showToast(msg: string, error = false) {
     setToast({ msg, error });
@@ -69,9 +80,14 @@ export default function UsersPage() {
     const res = await fetch("/api/password-resets");
     if (res.ok) setResets((await res.json()).requests ?? []);
   }
+  async function fetchEmailChanges() {
+    const res = await fetch("/api/email-changes");
+    if (res.ok) setEmailChanges((await res.json()).requests ?? []);
+  }
   useEffect(() => {
     fetchUsers();
     fetchResets();
+    fetchEmailChanges();
     fetch("/api/profile").then(async (r) => { if (r.ok) setMeId((await r.json()).user?.id ?? null); });
   }, []);
 
@@ -159,6 +175,32 @@ export default function UsersPage() {
     }
   }
 
+  async function approveEmailChange(req: EmailChangeRequest) {
+    setBusyId(req.id);
+    const res = await fetch(`/api/email-changes/${req.id}`, { method: "POST" });
+    setBusyId(null);
+    if (res.ok) {
+      setEmailChanges(prev => prev.filter(r => r.id !== req.id));
+      showToast(`${req.name} のメールアドレスを ${req.newEmail} に変更しました`);
+      fetchUsers();
+    } else {
+      const d = await res.json().catch(() => ({}));
+      showToast(d.error ?? "承認に失敗しました", true);
+    }
+  }
+
+  async function dismissEmailChange(req: EmailChangeRequest) {
+    setBusyId(req.id);
+    const res = await fetch(`/api/email-changes/${req.id}`, { method: "DELETE" });
+    setBusyId(null);
+    if (res.ok) {
+      setEmailChanges(prev => prev.filter(r => r.id !== req.id));
+      showToast(`${req.name} のメール変更申請を却下しました`);
+    } else {
+      showToast("却下に失敗しました", true);
+    }
+  }
+
   const pending = users.filter(u => u.status === "pending");
   const team = users.filter(u => u.status !== "pending");
   const adminCount = users.filter(u => u.role === "admin").length;
@@ -224,6 +266,31 @@ export default function UsersPage() {
                 <div className="approval-actions">
                   <ActionButton loading={busyId === req.id} onClick={() => resetPassword(req)} icon={<KeyRound size={15} />}>パスワードリセット</ActionButton>
                   <ActionButton variant="secondary" disabled={busyId === req.id} onClick={() => dismissReset(req)}>却下</ActionButton>
+                </div>
+              </div>
+            ))}
+          </div>
+        </article>
+      )}
+
+      {/* メールアドレス変更申請 */}
+      {emailChanges.length > 0 && (
+        <article className="panel approval-section email-section">
+          <div className="section-header">
+            <div><h2>メールアドレス変更申請（{emailChanges.length}）</h2><p>内容を確認し、承認するとユーザーのメールアドレスが更新されます。</p></div>
+          </div>
+          <div className="approval-list">
+            {emailChanges.map(req => (
+              <div className="approval-item" key={req.id}>
+                <span className="email-avatar"><Mail size={20} /></span>
+                <div className="approval-info">
+                  <strong>{req.name}{req.company ? `（${req.company}）` : ""}</strong>
+                  <span className="approval-sub email-diff">{req.currentEmail} <span className="email-arrow">→</span> <strong>{req.newEmail}</strong></span>
+                  <span className="detected-label email"><Clock size={12} />{new Date(req.createdAt).toLocaleString("ja-JP")} に申請</span>
+                </div>
+                <div className="approval-actions">
+                  <ActionButton loading={busyId === req.id} onClick={() => approveEmailChange(req)} icon={<Check size={15} />}>承認して変更</ActionButton>
+                  <ActionButton variant="secondary" disabled={busyId === req.id} onClick={() => dismissEmailChange(req)}>却下</ActionButton>
                 </div>
               </div>
             ))}

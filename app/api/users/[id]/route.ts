@@ -75,6 +75,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       await tx.activityLog.deleteMany({ where: { userId: id } });
       await tx.verificationCode.deleteMany({ where: { email: target.email } });
       await tx.passwordResetRequest.deleteMany({ where: { userId: id } });
+      await tx.emailChangeRequest.deleteMany({ where: { userId: id } });
       // キーワード削除（searchResult→contactPage→formField はCascade）
       await tx.keyword.deleteMany({ where: { createdById: id } });
       // 本体

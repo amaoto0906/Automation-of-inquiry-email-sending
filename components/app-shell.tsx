@@ -14,6 +14,7 @@ import {
   KeyRound,
   LayoutList,
   LogOut,
+  Mail,
   Menu,
   MessageSquareText,
   PanelLeftClose,
@@ -240,12 +241,16 @@ export function AppShell({ children, user }: AppShellProps) {
                     ) : (
                       notifItems.map((item) => {
                         const isReset = item.type === "password_reset";
+                        const isEmail = item.type === "email_change";
+                        const icon = isReset ? <KeyRound size={16} /> : isEmail ? <Mail size={16} /> : <UserPlus size={16} />;
+                        const title = isReset ? "パスワード再設定を申請" : isEmail ? "メールアドレス変更を申請" : "新規登録";
+                        const sub = isReset ? `${item.email}・対応待ち` : isEmail ? `新: ${item.email}・承認待ち` : `${item.company ?? item.email}・承認待ち`;
                         return (
                           <Link key={item.id} href="/users" className="notif-row" onClick={() => setNotifOpen(false)}>
-                            <span className={`notif-row-icon${isReset ? " reset" : ""}`}>{isReset ? <KeyRound size={16} /> : <UserPlus size={16} />}</span>
+                            <span className={`notif-row-icon${isReset ? " reset" : ""}${isEmail ? " email" : ""}`}>{icon}</span>
                             <div className="notif-row-body">
-                              <strong>{item.name} さんが{isReset ? "パスワード再設定を申請" : "新規登録"}</strong>
-                              <span>{isReset ? `${item.email}・対応待ち` : `${item.company ?? item.email}・承認待ち`}</span>
+                              <strong>{item.name} さんが{title}</strong>
+                              <span>{sub}</span>
                             </div>
                             <span className="notif-row-time">{timeAgo(item.createdAt)}</span>
                           </Link>

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { issueVerificationCode } from "@/lib/auth/verification";
-import { sendVerificationEmail, isEmailConfigured } from "@/lib/email";
+import { sendVerificationEmail } from "@/lib/email";
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
 
     const code = await issueVerificationCode(email);
     const sent = await sendVerificationEmail(email, code);
-    return NextResponse.json({ ok: true, devCode: !isEmailConfigured() ? code : undefined });
+    return NextResponse.json({ ok: true, devCode: sent.mock ? code : undefined });
   } catch (err) {
     console.error("再送信エラー:", err);
     return NextResponse.json({ error: "サーバーエラーが発生しました。" }, { status: 500 });

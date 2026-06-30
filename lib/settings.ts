@@ -8,7 +8,7 @@ import { prisma } from "@/lib/prisma";
  */
 
 export type SettingType = "text" | "password" | "textarea" | "number" | "boolean" | "select";
-export type SettingGroup = "search" | "sheets" | "sending" | "mail";
+export type SettingGroup = "search" | "sheets" | "sending" | "mail" | "smtp";
 
 export interface SettingField {
   key: string;
@@ -54,7 +54,27 @@ export const SETTING_FIELDS: SettingField[] = [
   {
     key: "MAIL_FROM", label: "通知メールの差出人", group: "mail", type: "text",
     placeholder: "Outreach Hub <no-reply@example.jp>",
-    help: "承認通知などのシステムメールの差出人表示。",
+    help: "確認コードや承認通知などのシステムメールの差出人表示。",
+  },
+  {
+    key: "SMTP_HOST", label: "SMTPホスト", group: "smtp", type: "text",
+    placeholder: "smtp.example.com",
+    help: "設定するとモック表示をやめ、確認コードを実際にメール送信します。",
+  },
+  {
+    key: "SMTP_PORT", label: "SMTPポート", group: "smtp", type: "number", default: "587",
+  },
+  {
+    key: "SMTP_SECURE", label: "SSL/TLS（465番ポート等）", group: "smtp", type: "boolean", default: "false",
+    help: "ポート465など暗黙のTLSを使う場合はオン。587（STARTTLS）はオフ。",
+  },
+  {
+    key: "SMTP_USER", label: "SMTPユーザー", group: "smtp", type: "text",
+    placeholder: "user@example.com",
+  },
+  {
+    key: "SMTP_PASS", label: "SMTPパスワード", group: "smtp", type: "password", secret: true,
+    help: "SMTP認証のパスワード。安全に保管されます。",
   },
   {
     key: "ALLOW_LIVE_SEND", label: "本番送信を有効化", group: "sending", type: "boolean", default: "false",
@@ -113,6 +133,12 @@ export async function setSettings(values: Record<string, string>): Promise<void>
       })
     );
   if (ops.length) await prisma.$transaction(ops);
+}
+
+/** 設定を削除（DBの値を消去）。env/既定値へフォールバックする。既知キーのみ。 */
+export async function deleteSetting(key: string): Promise<void> {
+  if (!(key in SETTING_FIELD_MAP)) return;
+  await prisma.appSetting.deleteMany({ where: { key } });
 }
 
 /** 現在値（DB→env）と、シークレットの設定済み有無を返す（マスク用） */

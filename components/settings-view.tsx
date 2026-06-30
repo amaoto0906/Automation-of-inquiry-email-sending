@@ -2,22 +2,28 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AlertTriangle, Bell, CheckCircle2, Clock3, Database, Download, KeyRound, LockKeyhole, Mail, PlugZap, Save, Search, Send, Sheet, ShieldCheck, X } from "lucide-react";
+import { AlertTriangle, Bell, CheckCircle2, Clock3, Database, Download, KeyRound, LockKeyhole, Mail, Save, Search, Send, Sheet, ShieldCheck, Trash2, X } from "lucide-react";
 import { ActionButton } from "@/components/action-button";
 import { PageTitle } from "@/components/ui";
 
+// API・連携の各セクション（Sidebarから個別に開く）
+const INTEGRATION_TABS = ["search", "sheets", "sending", "smtp"] as const;
+
 const TABS = [
-  { id: "integration", label: "API・連携", icon: PlugZap },
-  { id: "safety", label: "安全運用", icon: ShieldCheck },
-  { id: "delivery", label: "送信制御", icon: Send },
-  { id: "notification", label: "通知", icon: Bell },
-  { id: "data", label: "データ管理", icon: Database },
-  { id: "security", label: "セキュリティ", icon: LockKeyhole },
+  { id: "search", label: "検索（キーワード収集）", icon: Search, group: "API・連携" },
+  { id: "sheets", label: "Googleスプレッドシート連携", icon: Sheet, group: "API・連携" },
+  { id: "sending", label: "本番送信制御", icon: Send, group: "API・連携" },
+  { id: "smtp", label: "メール送信（SMTP）", icon: Mail, group: "API・連携" },
+  { id: "safety", label: "安全運用", icon: ShieldCheck, group: "ポリシー" },
+  { id: "delivery", label: "送信制御", icon: Clock3, group: "ポリシー" },
+  { id: "notification", label: "通知", icon: Bell, group: "ポリシー" },
+  { id: "data", label: "データ管理", icon: Database, group: "ポリシー" },
+  { id: "security", label: "セキュリティ", icon: LockKeyhole, group: "ポリシー" },
 ] as const;
 
 export function SettingsView() {
   const router = useRouter();
-  const [tab, setTab] = useState<(typeof TABS)[number]["id"]>("integration");
+  const [tab, setTab] = useState<(typeof TABS)[number]["id"]>("search");
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{ msg: string; error?: boolean } | null>(null);
@@ -43,7 +49,7 @@ export function SettingsView() {
       .then(async (r) => {
         if (!r.ok) return;
         const d = await r.json();
-        setCfg({ ...(d.values ?? {}), SERPAPI_API_KEY: "", GOOGLE_PRIVATE_KEY: "" });
+        setCfg({ ...(d.values ?? {}), SERPAPI_API_KEY: "", GOOGLE_PRIVATE_KEY: "", SMTP_PASS: "" });
         setSecretSet(d.secrets ?? {});
       })
       .finally(() => setLoaded(true));
@@ -53,6 +59,20 @@ export function SettingsView() {
     setCfg((prev) => ({ ...prev, [key]: value }));
     setDirty(true);
   }, []);
+
+  // 設定キーの削除（DBから消去し env/既定値へ戻す）
+  const deleteField = useCallback(async (key: string, label: string) => {
+    try {
+      const res = await fetch(`/api/settings?key=${encodeURIComponent(key)}`, { method: "DELETE" });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error ?? "削除に失敗しました");
+      setCfg({ ...(d.values ?? {}), SERPAPI_API_KEY: "", GOOGLE_PRIVATE_KEY: "", SMTP_PASS: "" });
+      setSecretSet(d.secrets ?? {});
+      showToast(`「${label}」を削除しました`);
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "削除に失敗しました", true);
+    }
+  }, [showToast]);
 
   const save = useCallback(async () => {
     setSaving(true);
@@ -65,7 +85,7 @@ export function SettingsView() {
       const d = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(d.error ?? "保存に失敗しました");
       // 再取得した値で更新し、シークレット入力欄はクリア
-      setCfg({ ...(d.values ?? {}), SERPAPI_API_KEY: "", GOOGLE_PRIVATE_KEY: "" });
+      setCfg({ ...(d.values ?? {}), SERPAPI_API_KEY: "", GOOGLE_PRIVATE_KEY: "", SMTP_PASS: "" });
       setSecretSet(d.secrets ?? {});
       setDirty(false);
       showToast("設定を保存しました");
@@ -136,20 +156,26 @@ export function SettingsView() {
 
       <section className="settings-layout">
         <nav className="settings-nav panel" aria-label="設定カテゴリー">
-          {TABS.map((t) => {
+          {TABS.map((t, i) => {
             const Icon = t.icon;
+            const showGroup = i === 0 || TABS[i - 1].group !== t.group;
             return (
-              <button key={t.id} type="button" className={tab === t.id ? "active" : ""} aria-current={tab === t.id ? "page" : undefined} onClick={() => setTab(t.id)}>
-                <Icon size={18} />{t.label}
-              </button>
+              <div key={t.id} className="settings-nav-item">
+                {showGroup && <p className="settings-nav-group">{t.group}</p>}
+                <button type="button" className={tab === t.id ? "active" : ""} aria-current={tab === t.id ? "page" : undefined} onClick={() => setTab(t.id)}>
+                  <Icon size={18} />{t.label}
+                </button>
+              </div>
             );
           })}
         </nav>
 
         <div className="settings-content" onChange={markDirty} onInput={markDirty}>
-          <div hidden={tab !== "integration"}>
-            {loaded ? <IntegrationSection cfg={cfg} setField={setField} secretSet={secretSet} /> : <article className="panel setting-section"><p className="empty-state">設定を読み込み中…</p></article>}
-          </div>
+          {(INTEGRATION_TABS as readonly string[]).includes(tab) && (
+            loaded
+              ? <IntegrationSection section={tab as (typeof INTEGRATION_TABS)[number]} cfg={cfg} setField={setField} deleteField={deleteField} secretSet={secretSet} />
+              : <article className="panel setting-section"><p className="empty-state">設定を読み込み中…</p></article>
+          )}
           <div hidden={tab !== "safety"}><SafetySection /></div>
           <div hidden={tab !== "delivery"}><DeliverySection /></div>
           <div hidden={tab !== "notification"}><NotificationSection /></div>
@@ -189,9 +215,9 @@ export function SettingsView() {
   );
 }
 
-function IntegrationSection({ cfg, setField, secretSet }: { cfg: Record<string, string>; setField: (k: string, v: string) => void; secretSet: Record<string, boolean> }) {
-  return (
-    <div className="settings-stack">
+function IntegrationSection({ section, cfg, setField, deleteField, secretSet }: { section: (typeof INTEGRATION_TABS)[number]; cfg: Record<string, string>; setField: (k: string, v: string) => void; deleteField: (k: string, label: string) => void; secretSet: Record<string, boolean> }) {
+  if (section === "search") {
+    return (
       <article className="panel setting-section">
         <div className="setting-heading"><span><Search size={22} /></span><div><h2>検索（キーワード収集）</h2><p>Google検索結果の取得に使用するプロバイダとAPIキーを設定します。</p></div></div>
         <div className="field">
@@ -202,16 +228,24 @@ function IntegrationSection({ cfg, setField, secretSet }: { cfg: Record<string, 
           </select>
           <small>本番ではSerpAPIを選択し、下のAPIキーを設定してください。</small>
         </div>
-        <SecretField id="s-serp" label="SerpAPI APIキー" placeholder="例: 0123abcd4567ef..." value={cfg.SERPAPI_API_KEY ?? ""} configured={!!secretSet.SERPAPI_API_KEY} onChange={(v) => setField("SERPAPI_API_KEY", v)} help="serpapi.com で発行したAPIキー。" />
+        <SecretField id="s-serp" label="Google検索APIキー（SerpAPI）" placeholder="例: 0123abcd4567ef..." value={cfg.SERPAPI_API_KEY ?? ""} configured={!!secretSet.SERPAPI_API_KEY} onChange={(v) => setField("SERPAPI_API_KEY", v)} onDelete={() => deleteField("SERPAPI_API_KEY", "Google検索APIキー")} help="serpapi.com で発行したAPIキー。追加・更新・削除できます。" />
       </article>
+    );
+  }
 
+  if (section === "sheets") {
+    return (
       <article className="panel setting-section">
         <div className="setting-heading"><span><Sheet size={22} /></span><div><h2>Googleスプレッドシート連携</h2><p>送信結果の記録先と、連携用サービスアカウントを設定します。</p></div></div>
         <div className="field"><label htmlFor="g-sid">スプレッドシートID</label><input id="g-sid" value={cfg.GOOGLE_SHEETS_SPREADSHEET_ID ?? ""} onChange={(e) => setField("GOOGLE_SHEETS_SPREADSHEET_ID", e.target.value)} placeholder="1AbC...xyz" /><small>シートURLの /d/ と /edit の間の文字列です。</small></div>
         <div className="field"><label htmlFor="g-email">サービスアカウントのメール</label><input id="g-email" value={cfg.GOOGLE_SERVICE_ACCOUNT_EMAIL ?? ""} onChange={(e) => setField("GOOGLE_SERVICE_ACCOUNT_EMAIL", e.target.value)} placeholder="xxxx@xxxx.iam.gserviceaccount.com" /><small>このアドレスに対象シートの「編集者」権限を付与してください。</small></div>
-        <SecretField id="g-key" label="サービスアカウント秘密鍵" textarea placeholder={"-----BEGIN PRIVATE KEY-----\n..."} value={cfg.GOOGLE_PRIVATE_KEY ?? ""} configured={!!secretSet.GOOGLE_PRIVATE_KEY} onChange={(v) => setField("GOOGLE_PRIVATE_KEY", v)} help="Google CloudのJSONキー内 private_key の値。" />
+        <SecretField id="g-key" label="サービスアカウント秘密鍵" textarea placeholder={"-----BEGIN PRIVATE KEY-----\n..."} value={cfg.GOOGLE_PRIVATE_KEY ?? ""} configured={!!secretSet.GOOGLE_PRIVATE_KEY} onChange={(v) => setField("GOOGLE_PRIVATE_KEY", v)} onDelete={() => deleteField("GOOGLE_PRIVATE_KEY", "サービスアカウント秘密鍵")} help="Google CloudのJSONキー内 private_key の値。" />
       </article>
+    );
+  }
 
+  if (section === "sending") {
+    return (
       <article className="panel setting-section">
         <div className="setting-heading"><span><Send size={22} /></span><div><h2>本番送信制御</h2><p>本番送信の可否と送信レートを制御します。</p></div></div>
         <label className="setting-toggle">
@@ -227,20 +261,40 @@ function IntegrationSection({ cfg, setField, secretSet }: { cfg: Record<string, 
           <div className="field"><label htmlFor="m-delay">送信間隔</label><div className="input-suffix"><input id="m-delay" type="number" min={0} value={cfg.DEFAULT_SEND_DELAY_SECONDS ?? "5"} onChange={(e) => setField("DEFAULT_SEND_DELAY_SECONDS", e.target.value)} /><span>秒</span></div><small>連続送信時の待機時間</small></div>
         </div>
       </article>
+    );
+  }
 
-      <article className="panel setting-section">
-        <div className="setting-heading"><span><Mail size={22} /></span><div><h2>通知メール</h2><p>承認通知などシステムメールの差出人表示です。</p></div></div>
-        <div className="field"><label htmlFor="mail-from">差出人</label><input id="mail-from" value={cfg.MAIL_FROM ?? ""} onChange={(e) => setField("MAIL_FROM", e.target.value)} placeholder="Outreach Hub <no-reply@example.jp>" /></div>
-      </article>
-    </div>
+  // section === "smtp"
+  return (
+    <article className="panel setting-section">
+      <div className="setting-heading"><span><Mail size={22} /></span><div><h2>メール送信（SMTP）</h2><p>確認コードや承認通知の実送信に使用します。未設定の場合はモック（画面表示）で動作します。</p></div></div>
+      <div className="form-row">
+        <div className="field"><label htmlFor="smtp-host">SMTPホスト</label><input id="smtp-host" value={cfg.SMTP_HOST ?? ""} onChange={(e) => setField("SMTP_HOST", e.target.value)} placeholder="smtp.example.com" /><small>設定すると確認コードを実際にメール送信します。</small></div>
+        <div className="field"><label htmlFor="smtp-port">SMTPポート</label><input id="smtp-port" type="number" min={1} value={cfg.SMTP_PORT ?? "587"} onChange={(e) => setField("SMTP_PORT", e.target.value)} /><small>587（STARTTLS）/ 465（TLS）</small></div>
+      </div>
+      <div className="field"><label htmlFor="smtp-user">SMTPユーザー</label><input id="smtp-user" value={cfg.SMTP_USER ?? ""} onChange={(e) => setField("SMTP_USER", e.target.value)} placeholder="user@example.com" /></div>
+      <SecretField id="smtp-pass" label="SMTPパスワード" placeholder="アプリパスワード等" value={cfg.SMTP_PASS ?? ""} configured={!!secretSet.SMTP_PASS} onChange={(v) => setField("SMTP_PASS", v)} onDelete={() => deleteField("SMTP_PASS", "SMTPパスワード")} help="SMTP認証のパスワード。" />
+      <label className="setting-toggle">
+        <div><strong>SSL/TLS を使用</strong><p>ポート465など暗黙のTLSを使う場合はオン。587（STARTTLS）はオフ。</p></div>
+        <input type="checkbox" checked={(cfg.SMTP_SECURE ?? "false") === "true"} onChange={(e) => setField("SMTP_SECURE", e.target.checked ? "true" : "false")} />
+        <span className="switch" />
+      </label>
+      <div className="field"><label htmlFor="mail-from">差出人（From）</label><input id="mail-from" value={cfg.MAIL_FROM ?? ""} onChange={(e) => setField("MAIL_FROM", e.target.value)} placeholder="Outreach Hub <no-reply@example.jp>" /></div>
+    </article>
   );
 }
 
-function SecretField({ id, label, value, configured, onChange, placeholder, help, textarea = false }: { id: string; label: string; value: string; configured: boolean; onChange: (v: string) => void; placeholder?: string; help?: string; textarea?: boolean }) {
+function SecretField({ id, label, value, configured, onChange, onDelete, placeholder, help, textarea = false }: { id: string; label: string; value: string; configured: boolean; onChange: (v: string) => void; onDelete?: () => void; placeholder?: string; help?: string; textarea?: boolean }) {
   const ph = configured ? "（設定済み。変更する場合のみ入力）" : placeholder;
   return (
     <div className="field">
-      <label htmlFor={id}><KeyRound size={13} />{label}{configured ? <span className="secret-chip set">設定済み</span> : <span className="secret-chip unset">未設定</span>}</label>
+      <label htmlFor={id}>
+        <KeyRound size={13} />{label}
+        {configured ? <span className="secret-chip set">設定済み</span> : <span className="secret-chip unset">未設定</span>}
+        {configured && onDelete && (
+          <button type="button" className="secret-delete" onClick={onDelete} aria-label={`${label}を削除`}><Trash2 size={12} />削除</button>
+        )}
+      </label>
       {textarea
         ? <textarea id={id} rows={4} value={value} onChange={(e) => onChange(e.target.value)} placeholder={ph} />
         : <input id={id} type="password" autoComplete="new-password" value={value} onChange={(e) => onChange(e.target.value)} placeholder={ph} />}
